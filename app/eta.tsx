@@ -7,13 +7,38 @@ export default function ETAPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [eta, setETA] = useState<number | null>(null);
+  const [weather, setWeather] = useState<string | null>(null);
+  const [traffic, setTraffic] = useState<string | null>(null);
 
-  // Dummy AI prediction function (replace with backend API)
+  // Dummy AI prediction function with weather and traffic
   const predictETA = () => {
-    // Here you would call your ML model on backend
-    // For demo, we just generate random ETA
-    const randomETA = Math.floor(Math.random() * 20 + 10); // 10-30 minutes
-    setETA(randomETA);
+    if (!from.trim() || !to.trim()) {
+      alert("Please enter both From and To locations");
+      return;
+    }
+
+    // Simulate traffic: random "Low", "Moderate", "Heavy"
+    const trafficOptions = ["Low", "Moderate", "Heavy"];
+    const trafficCondition = trafficOptions[Math.floor(Math.random() * 3)];
+    setTraffic(trafficCondition);
+
+    // Simulate weather: random "Sunny", "Rainy", "Stormy"
+    const weatherOptions = ["Sunny", "Rainy", "Stormy"];
+    const weatherCondition = weatherOptions[Math.floor(Math.random() * 3)];
+    setWeather(weatherCondition);
+
+    // Base ETA
+    let baseETA = Math.floor(Math.random() * 20 + 10); // 10-30 minutes
+
+    // Adjust ETA based on traffic
+    if (trafficCondition === "Moderate") baseETA += 5;
+    if (trafficCondition === "Heavy") baseETA += 10;
+
+    // Adjust ETA based on weather
+    if (weatherCondition === "Rainy") baseETA += 5;
+    if (weatherCondition === "Stormy") baseETA += 10;
+
+    setETA(baseETA);
   };
 
   return (
@@ -32,7 +57,7 @@ export default function ETAPage() {
             placeholder="From (Current Location)"
             value={from}
             onChangeText={setFrom}
-            className="ml-3 flex-1"
+            className="ml-3 flex-1 text-gray-700"
           />
         </View>
 
@@ -43,7 +68,7 @@ export default function ETAPage() {
             placeholder="To (Destination)"
             value={to}
             onChangeText={setTo}
-            className="ml-3 flex-1"
+            className="ml-3 flex-1 text-gray-700"
           />
         </View>
 
@@ -63,8 +88,23 @@ export default function ETAPage() {
             <Text className="text-green-800 text-lg font-semibold text-center">
               Estimated Time of Arrival
             </Text>
+
             <Text className="text-green-700 text-center mt-2 text-xl">
               {eta} minutes
+            </Text>
+
+            {/* Weather & Traffic Info */}
+            <View className="mt-4">
+              <Text className="text-green-800 font-semibold">Traffic:</Text>
+              <Text className="text-green-700">{traffic}</Text>
+
+              <Text className="text-green-800 font-semibold mt-2">Weather:</Text>
+              <Text className="text-green-700">{weather}</Text>
+            </View>
+
+            {/* Explanation */}
+            <Text className="text-green-700 mt-4 text-sm">
+              * ETA is dynamically adjusted based on current traffic and weather conditions.
             </Text>
           </View>
         )}
