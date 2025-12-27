@@ -1,14 +1,15 @@
 import { BASE_URL } from "@/constants/BaseUrl";
 import axios from "axios";
 
-interface LoginProps {
+interface CreateUserProps {
+  name: string;
   email: string;
   password: string;
 }
 
-export const Auth = {
-  async login(data: LoginProps) {
-    return await axios.post(`${BASE_URL}/auth/login`, data, {
+export const User = {
+  create: async (data: CreateUserProps) => {
+    return await axios.post(`${BASE_URL}/users/create`, data, {
       headers: {
         "Content-Type": "application/json",
       },
