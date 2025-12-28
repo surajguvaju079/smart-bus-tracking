@@ -4,6 +4,7 @@ import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import DashboardCard from "../components/DashboardCard";
 import BusTable from "../components/Bustable";
+import DriverDashboard from "../components/DriverDashboard";
 import MapCard from "../components/MapCard";
 import { fetchBuses, fetchDrivers } from "../api/api";
 
@@ -37,6 +38,21 @@ export default function AdminDashboard() {
         );
       case "Buses":
         return <BusTable buses={buses} />;
+      
+case "Dashboard":
+  return (
+    <View className="flex-1">
+      <View className="flex-row justify-between mb-6">
+        <DashboardCard title="Buses" count={buses.length} />
+        <DashboardCard title="Drivers" count={drivers.length} />
+      </View>
+      <BusTable buses={buses} />
+      {/* Updated MapCard */}
+      <MapCard buses={buses} />
+    </View>
+  );
+
+
       case "Drivers":
         return (
           <View>
@@ -60,6 +76,8 @@ export default function AdminDashboard() {
         return <Text className="text-green-700 font-bold text-xl">Reports Dashboard</Text>;
       case "Settings":
         return <Text className="text-green-700 font-bold text-xl">Settings Dashboard</Text>;
+
+
       case "Users":
         return <Text className="text-green-700 font-bold text-xl">Users Dashboard</Text>;
       default:
