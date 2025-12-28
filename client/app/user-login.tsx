@@ -4,6 +4,7 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -14,6 +15,7 @@ import { Auth } from "../api/auth";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../schema/userSchema";
+import { useUserStore } from "@/store/userStore";
 
 type LoginForm = {
   email: string;
@@ -21,36 +23,57 @@ type LoginForm = {
 };
 
 export default function UserLogin() {
+  // ========================
+  // Navigation
+  // ========================
   const router = useRouter();
 
-  const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>({
+  // ========================
+  // Zustand Store
+  // ========================
+  const { setUser } = useUserStore();
+
+  // ========================
+  // Local State
+  // ========================
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
 
+  // ========================
+  // Functions and Utilities
+  // ========================
   const onSubmit = async (data: LoginForm) => {
     try {
       const res = await Auth.login({
         email: data.email.trim().toLowerCase(),
         password: data.password.trim(),
       });
+      console.log("Login response:", res.data.responseObject);
 
-      const { accessToken, refreshToken, user } = res.data.responseObject;
-
-      await AsyncStorage.setItem("accessToken", accessToken);
-      await AsyncStorage.setItem("refreshToken", refreshToken);
+      const { access_token, refresh_token, user } = res.data.responseObject;
+      if (res?.data?.responseObject?.user) {
+        setUser(res.data.responseObject.user);
+      }
+      await AsyncStorage.setItem("accessToken", access_token);
+      await AsyncStorage.setItem("refreshToken", refresh_token);
       await AsyncStorage.setItem("user", JSON.stringify(user));
 
       Alert.alert("Success", "Login successful");
-      router.replace("/admin-dashboard"); // replace with your dashboard
+      router.replace("/admin-dashboard");
     } catch (error: any) {
-      console.log("Login error:", error.response?.data);
+      console.log("Login error:", error?.response?.data);
       if (error.response?.status === 401) {
         Alert.alert("Login Failed", "Invalid credentials");
       } else {
         Alert.alert(
           "Error",
-          error.response?.data?.error?.message || "Something went wrong"
+          error?.response?.data?.error?.message || "Something went wrong"
         );
       }
     }
@@ -82,7 +105,9 @@ export default function UserLogin() {
             </View>
           )}
         />
-        {errors.email && <Text className="text-red-500">{errors.email.message}</Text>}
+        {errors.email && (
+          <Text className="text-red-500">{errors.email.message}</Text>
+        )}
 
         {/* Password */}
         <Controller
@@ -101,16 +126,22 @@ export default function UserLogin() {
             </View>
           )}
         />
-        {errors.password && <Text className="text-red-500">{errors.password.message}</Text>}
+        {errors.password && (
+          <Text className="text-red-500">{errors.password.message}</Text>
+        )}
 
         <TouchableOpacity
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
           className="bg-green-700 py-3 rounded-lg mt-6"
         >
-          <Text className="text-white text-center font-semibold text-lg">
-            {isSubmitting ? "Logging in..." : "Login"}
-          </Text>
+          {isSubmitting ? (
+            <ActivityIndicator color="#ffffff" />
+          ) : (
+            <Text className="text-white text-center font-semibold text-lg">
+              Login
+            </Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity

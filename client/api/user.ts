@@ -13,4 +13,10 @@ export const User = {
       headers: { "Content-Type": "application/json" },
     });
   },
+
+  showUserById: async (userId: string) => {
+    return axios.get(`${BASE_URL}/users/${userId}`, {
+      headers: { "Content-Type": "application/json" },
+    });
+  },
 };

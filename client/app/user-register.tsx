@@ -4,6 +4,7 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -23,7 +24,11 @@ type RegisterForm = {
 export default function UserRegister() {
   const router = useRouter();
 
-  const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterForm>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
     defaultValues: { name: "", email: "", password: "" },
   });
@@ -74,7 +79,9 @@ export default function UserRegister() {
             </View>
           )}
         />
-        {errors.name && <Text className="text-red-500">{errors.name.message}</Text>}
+        {errors.name && (
+          <Text className="text-red-500">{errors.name.message}</Text>
+        )}
 
         {/* Email */}
         <Controller
@@ -94,7 +101,9 @@ export default function UserRegister() {
             </View>
           )}
         />
-        {errors.email && <Text className="text-red-500">{errors.email.message}</Text>}
+        {errors.email && (
+          <Text className="text-red-500">{errors.email.message}</Text>
+        )}
 
         {/* Password */}
         <Controller
@@ -113,16 +122,22 @@ export default function UserRegister() {
             </View>
           )}
         />
-        {errors.password && <Text className="text-red-500">{errors.password.message}</Text>}
+        {errors.password && (
+          <Text className="text-red-500">{errors.password.message}</Text>
+        )}
 
         <TouchableOpacity
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
           className="bg-green-700 py-3 rounded-lg mt-6"
         >
-          <Text className="text-white text-center font-semibold text-lg">
-            {isSubmitting ? "Creating..." : "Register"}
-          </Text>
+          {isSubmitting ? (
+            <ActivityIndicator color="#ffffff" />
+          ) : (
+            <Text className="text-white text-center font-semibold text-lg">
+              Register
+            </Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity
