@@ -1,18 +1,16 @@
-import { BASE_URL } from "@/constants/BaseUrl";
 import axios from "axios";
+import { BASE_URL } from "@/constants/BaseUrl";
 
-interface CreateUserProps {
+interface RegisterUserProps {
   name: string;
   email: string;
   password: string;
 }
 
 export const User = {
-  create: async (data: CreateUserProps) => {
-    return await axios.post(`${BASE_URL}/users/create`, data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
+  register: async (data: RegisterUserProps) => {
+    return axios.post(`${BASE_URL}/users`, data, {
+      headers: { "Content-Type": "application/json" },
     });
   },
 };
