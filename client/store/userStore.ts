@@ -14,8 +14,9 @@ export interface User {
 
 interface UserState {
   user: User | null;
+  users: User[] | [];
   isAuthenticated: boolean;
-
+  setUsers: (users: User[]) => void;
   setUser: (user: User) => void;
   updateUser: (data: Partial<User>) => void;
   clearUser: () => void;
@@ -23,7 +24,9 @@ interface UserState {
 
 export const useUserStore = create<UserState>((set) => ({
   user: null,
+  users: [],
   isAuthenticated: false,
+  setUsers: (users) => set({ users }),
 
   setUser: (user) =>
     set({

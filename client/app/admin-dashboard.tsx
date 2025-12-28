@@ -7,6 +7,7 @@ import BusTable from "../components/Bustable";
 import DriverDashboard from "../components/DriverDashboard";
 import MapCard from "../components/MapCard";
 import { fetchBuses, fetchDrivers } from "../api/api";
+import UserTable from "@/components/UserTable";
 
 export default function AdminDashboard() {
   const [buses, setBuses] = useState<any[]>([]);
@@ -38,28 +39,32 @@ export default function AdminDashboard() {
         );
       case "Buses":
         return <BusTable buses={buses} />;
-      
-case "Dashboard":
-  return (
-    <View className="flex-1">
-      <View className="flex-row justify-between mb-6">
-        <DashboardCard title="Buses" count={buses.length} />
-        <DashboardCard title="Drivers" count={drivers.length} />
-      </View>
-      <BusTable buses={buses} />
-      {/* Updated MapCard */}
-      <MapCard buses={buses} />
-    </View>
-  );
 
+      case "Dashboard":
+        return (
+          <View className="flex-1">
+            <View className="flex-row justify-between mb-6">
+              <DashboardCard title="Buses" count={buses.length} />
+              <DashboardCard title="Drivers" count={drivers.length} />
+            </View>
+            <BusTable buses={buses} />
+            {/* Updated MapCard */}
+            <MapCard buses={buses} />
+          </View>
+        );
 
       case "Drivers":
         return (
           <View>
-            <Text className="text-green-700 font-bold text-xl mb-2">Driver List</Text>
+            <Text className="text-green-700 font-bold text-xl mb-2">
+              Driver List
+            </Text>
             {/* Add driver search & list */}
             {drivers.map((driver) => (
-              <View key={driver.id} className="flex-row justify-between p-3 bg-green-50 mb-2 rounded-xl">
+              <View
+                key={driver.id}
+                className="flex-row justify-between p-3 bg-green-50 mb-2 rounded-xl"
+              >
                 <Text className="text-green-800">{driver.name}</Text>
                 <Text className="text-green-600">{driver.busNo}</Text>
               </View>
@@ -67,19 +72,38 @@ case "Dashboard":
           </View>
         );
       case "Routes":
-        return <Text className="text-green-700 font-bold text-xl">Routes Dashboard</Text>;
+        return (
+          <Text className="text-green-700 font-bold text-xl">
+            Routes Dashboard
+          </Text>
+        );
       case "Payments":
-        return <Text className="text-green-700 font-bold text-xl">Payment Dashboard</Text>;
+        return (
+          <Text className="text-green-700 font-bold text-xl">
+            Payment Dashboard
+          </Text>
+        );
       case "Fares":
-        return <Text className="text-green-700 font-bold text-xl">Fare Dashboard</Text>;
+        return (
+          <Text className="text-green-700 font-bold text-xl">
+            Fare Dashboard
+          </Text>
+        );
       case "Reports":
-        return <Text className="text-green-700 font-bold text-xl">Reports Dashboard</Text>;
+        return (
+          <Text className="text-green-700 font-bold text-xl">
+            Reports Dashboard
+          </Text>
+        );
       case "Settings":
-        return <Text className="text-green-700 font-bold text-xl">Settings Dashboard</Text>;
-
+        return (
+          <Text className="text-green-700 font-bold text-xl">
+            Settings Dashboard
+          </Text>
+        );
 
       case "Users":
-        return <Text className="text-green-700 font-bold text-xl">Users Dashboard</Text>;
+        return <UserTable />;
       default:
         return null;
     }

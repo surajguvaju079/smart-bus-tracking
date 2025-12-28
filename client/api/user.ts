@@ -19,4 +19,11 @@ export const User = {
       headers: { "Content-Type": "application/json" },
     });
   },
+  show: async (page: number = 1, limit: number = 10) => {
+    return axios.get(`${BASE_URL}/users?page=${page}&limit=${limit}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  },
 };

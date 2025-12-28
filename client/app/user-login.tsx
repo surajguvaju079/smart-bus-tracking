@@ -56,13 +56,19 @@ export default function UserLogin() {
       });
       console.log("Login response:", res.data.responseObject);
 
-      const { access_token, refresh_token, user } = res.data.responseObject;
+      const { access_token, refresh_token } = res.data.responseObject;
       if (res?.data?.responseObject?.user) {
         setUser(res.data.responseObject.user);
       }
       await AsyncStorage.setItem("accessToken", access_token);
       await AsyncStorage.setItem("refreshToken", refresh_token);
-      await AsyncStorage.setItem("user", JSON.stringify(user));
+
+      if (res?.data?.responseObject?.user?.role === "ADMIN") {
+        router.replace("/admin-dashboard");
+        return;
+      } else {
+        router.replace("/home");
+      }
 
       Alert.alert("Success", "Login successful");
       router.replace("/admin-dashboard");
