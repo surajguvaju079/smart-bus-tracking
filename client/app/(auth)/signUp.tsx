@@ -4,6 +4,7 @@
 // import { useForm, Controller } from "react-hook-form";
 // import { zodResolver } from "@hookform/resolvers/zod";
 // import { signUpSchema, SignUpType } from "../../schema/SignUpSchema";
+// import { User } from "@/api/user";
 
 // const SignUp = () => {
 //   const {
@@ -20,9 +21,27 @@
 //     },
 //   });
 
-//   const onSubmit = (data: SignUpType) => {
-//     console.log("SignUp Success:", data);
-//     router.replace("/home"); // Navigate to Home page
+//   // ========================
+//   // api call
+//   // =======================
+
+//   const onSubmit =async (data: SignUpType) => {
+//     try {
+
+//         const res = await User.create({
+//             name: data.name,
+//             email: data.email,
+//             password: data.password,
+//         });
+//         if(res.status === 201){
+//             console.log("user created successfully");
+//             router.replace("/signIn");
+//         }
+        
+//     } catch (error :any) {
+//         console.error("error in creating user",error.message)
+        
+//     } // Navigate to Home page
 //   };
 
 //   return (
