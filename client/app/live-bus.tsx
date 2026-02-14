@@ -50,7 +50,7 @@ export default function LiveBusDashboard() {
         prev.map((bus) => ({
           ...bus,
           eta: Math.max(1, bus.eta + Math.floor(Math.random() * 3 - 1)),
-        }))
+        })),
       );
     }, 5000);
     return () => clearInterval(interval);
@@ -96,11 +96,7 @@ export default function LiveBusDashboard() {
                   router.push({
                     pathname: "/live-bus-map",
                     params: {
-                      lat: bus.lat,
-                      lng: bus.lng,
-                      busNo: bus.busNo,
-                      route: bus.route,
-                      eta: bus.eta,
+                      tripId: bus?.id || 1,
                     },
                   })
                 }

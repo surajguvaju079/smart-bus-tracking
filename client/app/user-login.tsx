@@ -54,6 +54,7 @@ export default function UserLogin() {
         email: data.email.trim().toLowerCase(),
         password: data.password.trim(),
       });
+      console.log("Login response status:", res.status);
       console.log("Login response:", res.data.responseObject);
 
       const { access_token, refresh_token } = res.data.responseObject;
@@ -73,13 +74,13 @@ export default function UserLogin() {
       Alert.alert("Success", "Login successful");
       router.replace("/admin-dashboard");
     } catch (error: any) {
-      console.log("Login error:", error?.response?.data);
+      console.log("Login error:", error?.response || error.message || error);
       if (error.response?.status === 401) {
         Alert.alert("Login Failed", "Invalid credentials");
       } else {
         Alert.alert(
           "Error",
-          error?.response?.data?.error?.message || "Something went wrong"
+          error?.response?.data?.error?.message || "Something went wrong",
         );
       }
     }
