@@ -1,8 +1,16 @@
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { useState, useEffect } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import AppHeader from "../components/AppHeader";
+import { trip } from "@/api/trip";
 
 // Sample 20 proper bus routes in Kathmandu
 const busRoutes = [
@@ -40,8 +48,13 @@ const generateBuses = () =>
   }));
 
 export default function LiveBusDashboard() {
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [buses, setBuses] = useState(generateBuses());
+
+  useEffect(() => {
+    fetchBuses();
+  }, []);
 
   // Simulate live ETA updates
   useEffect(() => {
@@ -55,6 +68,39 @@ export default function LiveBusDashboard() {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  const fetchBuses = async () => {
+    setLoading(true);
+    try {
+      const res = await trip.getAll();
+      if (res.status === 200) {
+        const trips = res.data.responseObject.trips;
+        console.log("Fetched trips:", trips);
+        const updatedBuses = trips.map((trip: any) => ({
+          id: trip.id,
+          busNo: trip.busNo,
+          route: trip.route,
+          eta: trip.eta,
+          lat: trip.latitude,
+          lng: trip.longitude,
+          status: trip.status,
+        }));
+        setBuses(updatedBuses);
+      }
+    } catch (error) {
+      console.error("Error fetching buses:", error);
+      Alert.alert("Error", "Failed to fetch bus data. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading)
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size={"large"} color={"green"} />
+      </View>
+    );
 
   return (
     <ScrollView className="flex-1 bg-white">
@@ -96,7 +142,7 @@ export default function LiveBusDashboard() {
                   router.push({
                     pathname: "/live-bus-map",
                     params: {
-                      tripId: bus?.id || 1,
+                      tripId: 1,
                     },
                   })
                 }
