@@ -8,6 +8,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 export default function Home() {
   const router = useRouter();
 
+  router.push("/live-bus");
+
   return (
     <View className="flex-1 bg-white">
       <ScrollView>
@@ -24,7 +26,9 @@ export default function Home() {
           {/* Driver Login */}
           <FeatureCard
             title="Driver Login"
-            icon={<MaterialIcons name="directions-bus" size={28} color="#166534" />}
+            icon={
+              <MaterialIcons name="directions-bus" size={28} color="#166534" />
+            }
             onPress={() => router.push("/driver-login")}
           />
 
@@ -59,7 +63,9 @@ export default function Home() {
           {/* Live Bus Location */}
           <FeatureCard
             title="Live Bus Location"
-            icon={<MaterialIcons name="location-on" size={28} color="#166534" />}
+            icon={
+              <MaterialIcons name="location-on" size={28} color="#166534" />
+            }
             onPress={() => router.push("/live-bus")}
           />
 

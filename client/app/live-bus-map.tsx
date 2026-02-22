@@ -5,27 +5,27 @@ import AppHeader from "../components/AppHeader";
 import { io } from "socket.io-client";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-const socket = io("http://192.168.165.90:8080");
+const socket = io("http://192.168.254.33:8080");
 export default function LiveBusMap() {
   const params = useLocalSearchParams();
   const { tripId } = params as any;
 
   const [location, setLocation] = useState<any>(null);
-
   useEffect(() => {
-    console.log("socket instance:", socket);
-    console.log("Connecting to socket for tripId:", tripId);
-    socket.connect();
-    socket.emit("join-trip", Number(tripId));
+    if (!tripId) return;
 
-    socket.on("trip:location", (data) => {
+    console.log("Joining trip room:", Number(tripId));
+
+    const handleLocation = (data: any) => {
       console.log("Received location update:", data);
       setLocation(data);
-    });
+    };
+
+    socket.emit("join-trip", Number(tripId));
+    socket.on("trip:location", handleLocation);
 
     return () => {
-      /* socket.emit("leaveTrip", tripId); */
-      socket.disconnect();
+      socket.off("trip:location", handleLocation);
     };
   }, [tripId]);
 

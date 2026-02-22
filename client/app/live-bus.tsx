@@ -78,11 +78,11 @@ export default function LiveBusDashboard() {
         console.log("Fetched trips:", trips);
         const updatedBuses = trips.map((trip: any) => ({
           id: trip.id,
-          busNo: trip.busNo,
-          route: trip.route,
+          busNo: trip.vehicleNumber,
+          route: `${trip.startLocationName} → ${trip.endLocationName}`,
           eta: trip.eta,
-          lat: trip.latitude,
-          lng: trip.longitude,
+          lat: trip.startLatitude,
+          lng: trip.startLongitude,
           status: trip.status,
         }));
         setBuses(updatedBuses);
@@ -127,7 +127,9 @@ export default function LiveBusDashboard() {
             </View>
 
             <View className="items-end">
-              <Text className="text-gray-700 text-sm">ETA: {bus.eta} min</Text>
+              <Text className="text-gray-700 text-sm">
+                ETA: {bus.eta || "N/A"} min
+              </Text>
               <Text
                 className={`mt-1 text-xs font-semibold ${
                   bus.status === "Live" ? "text-green-700" : "text-yellow-600"
@@ -142,7 +144,7 @@ export default function LiveBusDashboard() {
                   router.push({
                     pathname: "/live-bus-map",
                     params: {
-                      tripId: 1,
+                      tripId: bus.id,
                     },
                   })
                 }
