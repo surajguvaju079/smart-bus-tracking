@@ -5,7 +5,7 @@ import AppHeader from "../components/AppHeader";
 import { io } from "socket.io-client";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-const socket = io("http://192.168.254.33:8080");
+const socket = io("http://192.168.32.90:8080");
 export default function LiveBusMap() {
   const params = useLocalSearchParams();
   const { tripId } = params as any;
@@ -29,6 +29,8 @@ export default function LiveBusMap() {
     };
   }, [tripId]);
 
+  console.log("Current location state:", location);
+
   if (!location)
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -42,20 +44,20 @@ export default function LiveBusMap() {
 
       <MapView
         style={{ flex: 1 }}
-        initialRegion={{
-          latitude: location.latitude,
-          longitude: location.longitude,
+        region={{
+          latitude: location?.latitude || 27.7017,
+          longitude: location?.longitude || 85.3206,
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         }}
       >
         <Marker
           coordinate={{
-            latitude: location.latitude,
-            longitude: location.longitude,
+            latitude: location?.latitude || 27.7017,
+            longitude: location?.longitude || 85.3206,
           }}
-          title={`Bus ${location.busNo}`}
-          description={`Route: ${location.route}, ETA: ${location.eta} min`}
+          title={`Bus ${location?.busNo}`}
+          description={`Route: ${location?.route}, ETA: ${location?.eta} min`}
         >
           <MaterialIcons name="directions-bus" size={32} color="#15803d" />
         </Marker>
