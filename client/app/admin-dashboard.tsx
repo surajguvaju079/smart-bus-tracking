@@ -40,19 +40,6 @@ export default function AdminDashboard() {
       case "Buses":
         return <BusTable buses={buses} />;
 
-      case "Dashboard":
-        return (
-          <View className="flex-1">
-            <View className="flex-row justify-between mb-6">
-              <DashboardCard title="Buses" count={buses.length} />
-              <DashboardCard title="Drivers" count={drivers.length} />
-            </View>
-            <BusTable buses={buses} />
-            {/* Updated MapCard */}
-            <MapCard buses={buses} />
-          </View>
-        );
-
       case "Drivers":
         return (
           <View>

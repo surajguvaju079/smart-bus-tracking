@@ -5,7 +5,8 @@ import { tripLocation } from "@/api/trip-location";
 import { useLocalSearchParams } from "expo-router";
 const DriverTrackingScreen = () => {
   const params = useLocalSearchParams();
-  const { tripId } = params as any;
+  const { id: tripId } = params as any;
+  console.log("Received tripId:", tripId);
   const [hasPermission, setHasPermission] = React.useState(false);
   const [isTracking, setIsTracking] = React.useState(false);
   const intervalRef = React.useRef<number | null>(null);

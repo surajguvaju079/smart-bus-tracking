@@ -75,6 +75,19 @@ export default function Home() {
             icon={<MaterialIcons name="dashboard" size={28} color="#166534" />}
             onPress={() => router.push("/admin-dashboard")}
           />
+
+          <FeatureCard
+            title="Driver Tracking Location"
+            icon={
+              <MaterialIcons name="my-location" size={28} color="#166534" />
+            }
+            onPress={() =>
+              router.push({
+                pathname: "/(driver)/[id]",
+                params: { id: 1 },
+              })
+            }
+          />
         </View>
       </ScrollView>
 
