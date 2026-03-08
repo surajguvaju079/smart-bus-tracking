@@ -2,7 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { useState, useEffect } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import AppHeader from "../components/AppHeader";
+import AppHeader from "../../components/AppHeader";
 
 // Existing buses or initialize 10-20 buses
 const initialBuses = [

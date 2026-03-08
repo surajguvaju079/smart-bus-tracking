@@ -9,12 +9,12 @@ import {
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import AppHeader from "../components/AppHeader";
-import { Auth } from "../api/auth";
+import AppHeader from "../../components/AppHeader";
+import { Auth } from "../../api/auth";
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema } from "../schema/userSchema";
+import { loginSchema } from "../../schema/userSchema";
 import { useUserStore } from "@/store/userStore";
 
 type LoginForm = {
@@ -65,14 +65,19 @@ export default function UserLogin() {
       await AsyncStorage.setItem("refreshToken", refresh_token);
 
       if (res?.data?.responseObject?.user?.role === "ADMIN") {
+        console.log("admin login is here");
         router.replace("/admin-dashboard");
         return;
-      } else {
-        router.replace("/home");
       }
 
-      Alert.alert("Success", "Login successful");
-      router.replace("/admin-dashboard");
+      if (res?.data?.responseObject?.user?.role === "USER") {
+        console.log("user login is here");
+        router.replace("/home");
+        return;
+      }
+
+      Alert.alert("Login Successful", "Welcome back!");
+      return;
     } catch (error: any) {
       console.log("Login error:", error?.response || error.message || error);
       if (error.response?.status === 401) {

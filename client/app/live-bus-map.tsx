@@ -6,7 +6,7 @@ import { io } from "socket.io-client";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState, useRef } from "react";
 
-const socket = io("http://192.168.32.90:8080");
+const socket = io("http://192.168.254.33:8080");
 
 export default function LiveBusMap() {
   const params = useLocalSearchParams();

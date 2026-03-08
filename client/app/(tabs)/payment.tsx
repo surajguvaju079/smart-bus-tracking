@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Linking, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Linking,
+  Alert,
+} from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import AppHeader from "../components/AppHeader";
+import AppHeader from "@/components/AppHeader";
 
 // Example bus stops with approximate distance in km
 const BUS_STOPS = [
@@ -22,18 +29,21 @@ export default function PaymentPage() {
   const [fare, setFare] = useState(distance * 5);
 
   // Update fare when selecting stops
-  const updateFare = (fromStop: typeof BUS_STOPS[0], toStop: typeof BUS_STOPS[0]) => {
+  const updateFare = (
+    fromStop: (typeof BUS_STOPS)[0],
+    toStop: (typeof BUS_STOPS)[0],
+  ) => {
     const dist = Math.abs(toStop.km - fromStop.km);
     setDistance(dist);
     setFare(dist * 5);
   };
 
-  const handleFromSelect = (stop: typeof BUS_STOPS[0]) => {
+  const handleFromSelect = (stop: (typeof BUS_STOPS)[0]) => {
     setFrom(stop);
     updateFare(stop, to);
   };
 
-  const handleToSelect = (stop: typeof BUS_STOPS[0]) => {
+  const handleToSelect = (stop: (typeof BUS_STOPS)[0]) => {
     setTo(stop);
     updateFare(from, stop);
   };
@@ -76,7 +86,9 @@ export default function PaymentPage() {
     <ScrollView className="flex-1 bg-green-50">
       <AppHeader />
       <View className="px-6 mt-6">
-        <Text className="text-2xl font-bold text-green-700 text-center">Fare and Payment</Text>
+        <Text className="text-2xl font-bold text-green-700 text-center">
+          Fare and Payment
+        </Text>
 
         {/* FROM */}
         <Text className="text-gray-700 mt-6 mb-2">From</Text>
@@ -119,7 +131,9 @@ export default function PaymentPage() {
           Distance Travelled: <Text className="font-bold">{distance} km</Text>
         </Text>
         <View className="bg-green-600 rounded-xl py-4 mt-2">
-          <Text className="text-white text-center text-lg font-bold">Total Fare: Rs. {fare}.00</Text>
+          <Text className="text-white text-center text-lg font-bold">
+            Total Fare: Rs. {fare}.00
+          </Text>
         </View>
 
         {/* eSewa Option */}
@@ -133,7 +147,9 @@ export default function PaymentPage() {
           onPress={handlePay}
           className="bg-green-700 py-4 rounded-xl mt-6"
         >
-          <Text className="text-white text-center font-bold text-lg">Pay Now</Text>
+          <Text className="text-white text-center font-bold text-lg">
+            Pay Now
+          </Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

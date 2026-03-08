@@ -10,7 +10,7 @@ import { useRouter } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
-import AppHeader from "../components/AppHeader";
+import AppHeader from "@/components/AppHeader";
 
 export default function DriverRegister() {
   const router = useRouter();

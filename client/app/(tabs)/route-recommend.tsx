@@ -1,20 +1,96 @@
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import AppHeader from "../components/AppHeader";
+import AppHeader from "@/components/AppHeader";
 
 const ALL_ROUTES = [
-  { busNo: "27", stops: ["Ratnapark", "Tripureshwor", "Kalanki"], eta: 18, lat: 27.7017, lng: 85.3206, status: "Live" },
-  { busNo: "12", stops: ["Ratnapark", "Balkhu", "Kalanki"], eta: 24, lat: 27.705, lng: 85.312, status: "Moderate" },
-  { busNo: "5", stops: ["Tripureshwor", "Kalanki"], eta: 30, lat: 27.709, lng: 85.31, status: "Live" },
-  { busNo: "3", stops: ["Kalanki", "Bhaktapur"], eta: 35, lat: 27.71, lng: 85.325, status: "Moderate" },
-  { busNo: "7", stops: ["Tripureshwor", "Thamel"], eta: 22, lat: 27.704, lng: 85.315, status: "Live" },
-  { busNo: "9", stops: ["Ratnapark", "Koteshwor"], eta: 28, lat: 27.708, lng: 85.318, status: "Live" },
-  { busNo: "15", stops: ["Chabahil", "Kalanki"], eta: 26, lat: 27.706, lng: 85.322, status: "Moderate" },
-  { busNo: "18", stops: ["Kalanki", "Koteshwor"], eta: 32, lat: 27.703, lng: 85.319, status: "Live" },
-  { busNo: "20", stops: ["Maharajgunj", "Lagankhel"], eta: 40, lat: 27.707, lng: 85.321, status: "Moderate" },
-  { busNo: "21", stops: ["Ratnapark", "Gongabu"], eta: 29, lat: 27.702, lng: 85.317, status: "Live" },
+  {
+    busNo: "27",
+    stops: ["Ratnapark", "Tripureshwor", "Kalanki"],
+    eta: 18,
+    lat: 27.7017,
+    lng: 85.3206,
+    status: "Live",
+  },
+  {
+    busNo: "12",
+    stops: ["Ratnapark", "Balkhu", "Kalanki"],
+    eta: 24,
+    lat: 27.705,
+    lng: 85.312,
+    status: "Moderate",
+  },
+  {
+    busNo: "5",
+    stops: ["Tripureshwor", "Kalanki"],
+    eta: 30,
+    lat: 27.709,
+    lng: 85.31,
+    status: "Live",
+  },
+  {
+    busNo: "3",
+    stops: ["Kalanki", "Bhaktapur"],
+    eta: 35,
+    lat: 27.71,
+    lng: 85.325,
+    status: "Moderate",
+  },
+  {
+    busNo: "7",
+    stops: ["Tripureshwor", "Thamel"],
+    eta: 22,
+    lat: 27.704,
+    lng: 85.315,
+    status: "Live",
+  },
+  {
+    busNo: "9",
+    stops: ["Ratnapark", "Koteshwor"],
+    eta: 28,
+    lat: 27.708,
+    lng: 85.318,
+    status: "Live",
+  },
+  {
+    busNo: "15",
+    stops: ["Chabahil", "Kalanki"],
+    eta: 26,
+    lat: 27.706,
+    lng: 85.322,
+    status: "Moderate",
+  },
+  {
+    busNo: "18",
+    stops: ["Kalanki", "Koteshwor"],
+    eta: 32,
+    lat: 27.703,
+    lng: 85.319,
+    status: "Live",
+  },
+  {
+    busNo: "20",
+    stops: ["Maharajgunj", "Lagankhel"],
+    eta: 40,
+    lat: 27.707,
+    lng: 85.321,
+    status: "Moderate",
+  },
+  {
+    busNo: "21",
+    stops: ["Ratnapark", "Gongabu"],
+    eta: 29,
+    lat: 27.702,
+    lng: 85.317,
+    status: "Live",
+  },
 ];
 
 export default function RouteRecommend() {
@@ -32,10 +108,10 @@ export default function RouteRecommend() {
 
     const filteredRoutes = ALL_ROUTES.filter((r) => {
       const fromIndex = r.stops.findIndex(
-        (stop) => stop.toLowerCase() === from.trim().toLowerCase()
+        (stop) => stop.toLowerCase() === from.trim().toLowerCase(),
       );
       const toIndex = r.stops.findIndex(
-        (stop) => stop.toLowerCase() === to.trim().toLowerCase()
+        (stop) => stop.toLowerCase() === to.trim().toLowerCase(),
       );
 
       return fromIndex !== -1 && toIndex !== -1 && fromIndex < toIndex;
@@ -92,12 +168,17 @@ export default function RouteRecommend() {
         </Text>
 
         {routes.map((r) => (
-          <View key={r.busNo} className="border border-green-200 rounded-xl p-4 mt-4">
+          <View
+            key={r.busNo}
+            className="border border-green-200 rounded-xl p-4 mt-4"
+          >
             <View className="flex-row justify-between items-center">
               <Text className="text-lg font-bold text-green-700">
                 Bus No: {r.busNo}
               </Text>
-              <Text className={`text-sm font-semibold ${r.status === "Live" ? "text-green-600" : "text-yellow-600"}`}>
+              <Text
+                className={`text-sm font-semibold ${r.status === "Live" ? "text-green-600" : "text-yellow-600"}`}
+              >
                 {r.status}
               </Text>
             </View>
@@ -106,7 +187,9 @@ export default function RouteRecommend() {
 
             <View className="flex-row justify-between mt-3">
               <Text className="text-sm text-gray-700">⏱ ETA: {r.eta} min</Text>
-              <Text className="text-sm text-gray-700">📍 Stops: {r.stops.length}</Text>
+              <Text className="text-sm text-gray-700">
+                📍 Stops: {r.stops.length}
+              </Text>
             </View>
 
             <View className="flex-row mt-4 justify-between">
@@ -129,7 +212,9 @@ export default function RouteRecommend() {
                 }}
               >
                 <Text className="text-white font-semibold text-center">
-                  {selectedRoute?.busNo === r.busNo ? "Selected" : "Select Route"}
+                  {selectedRoute?.busNo === r.busNo
+                    ? "Selected"
+                    : "Select Route"}
                 </Text>
               </TouchableOpacity>
             </View>

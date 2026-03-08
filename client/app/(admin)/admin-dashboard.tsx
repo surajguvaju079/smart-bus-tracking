@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { View, ScrollView, Text } from "react-native";
-import Header from "../components/Header";
-import Sidebar from "../components/Sidebar";
-import DashboardCard from "../components/DashboardCard";
-import BusTable from "../components/Bustable";
-import DriverDashboard from "../components/DriverDashboard";
-import MapCard from "../components/MapCard";
-import { fetchBuses, fetchDrivers } from "../api/api";
+import Header from "../../components/Header";
+import Sidebar from "../../components/Sidebar";
+import DashboardCard from "../../components/DashboardCard";
+import BusTable from "../../components/Bustable";
+import MapCard from "../../components/MapCard";
+import { fetchBuses, fetchDrivers } from "../../api/api";
 import UserTable from "@/components/UserTable";
 
 export default function AdminDashboard() {

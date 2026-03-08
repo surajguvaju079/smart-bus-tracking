@@ -1,7 +1,7 @@
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
-import AppHeader from "../components/AppHeader";
+import AppHeader from "../../components/AppHeader";
 
 export default function DriverLogin() {
   const router = useRouter();
