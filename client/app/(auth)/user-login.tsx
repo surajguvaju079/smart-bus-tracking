@@ -75,6 +75,11 @@ export default function UserLogin() {
         router.replace("/home");
         return;
       }
+      if (res?.data?.responseObject?.user?.role === "DRIVER") {
+        console.log("driver login is here");
+        router.replace("/driver-dashboard");
+        return;
+      }
 
       Alert.alert("Login Successful", "Welcome back!");
       return;
@@ -96,7 +101,7 @@ export default function UserLogin() {
       <AppHeader />
       <View className="px-6 mt-12">
         <Text className="text-2xl font-bold text-green-700 text-center">
-          User Login
+          User/Driver Login
         </Text>
 
         {/* Email */}

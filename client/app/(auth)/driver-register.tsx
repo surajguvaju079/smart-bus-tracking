@@ -116,7 +116,7 @@ export default function DriverRegister() {
 
         {/* Login Link */}
         <TouchableOpacity
-          onPress={() => router.push("/driver-login")}
+          onPress={() => router.push("/user-login")}
           className="mt-5 mb-10"
         >
           <Text className="text-center text-green-700">
