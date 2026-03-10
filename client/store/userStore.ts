@@ -12,6 +12,8 @@ export interface User {
   isFirstLogin: boolean;
   profileImage: string;
   phoneNumber: string;
+  vehicle_number?: string;
+  driver_id?: number;
 }
 
 interface UserState {

@@ -9,20 +9,26 @@ import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import AppHeader from "@/components/AppHeader";
 import { trip } from "@/api/trip";
+import { useUserStore } from "@/store/userStore";
 
 export default function ActiveTrip() {
+  const user = useUserStore((state) => state.user);
   const [trips, setTrips] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const router = useRouter();
 
   useEffect(() => {
+    if (!user?.driver_id) {
+      router.push(`/(auth)/user-login`);
+      return;
+    }
     fetchTrips();
   }, []);
 
   const fetchTrips = async () => {
     try {
-      const res = await trip.getByDriver(39);
+      const res = await trip.getByDriver(user?.driver_id!);
 
       const data = res?.data?.responseObject?.trips || [];
 
@@ -37,7 +43,7 @@ export default function ActiveTrip() {
   };
 
   const goToTracking = (tripId: number) => {
-    router.push(`/driver/tracking?id=${tripId}`);
+    router.push(`/(driver)/${tripId}`);
   };
 
   const getStatusColor = (status: string) => {

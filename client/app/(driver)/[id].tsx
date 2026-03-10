@@ -1,27 +1,32 @@
 import { View, Text, Alert, ActivityIndicator, Button } from "react-native";
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import * as Location from "expo-location";
+import MapView, { Marker, Polyline } from "react-native-maps";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { tripLocation } from "@/api/trip-location";
-import { useLocalSearchParams } from "expo-router";
+import AppHeader from "@/components/AppHeader";
+
 const DriverTrackingScreen = () => {
-  const params = useLocalSearchParams();
-  const { id: tripId } = params as any;
-  console.log("Received tripId:", tripId);
-  const [hasPermission, setHasPermission] = React.useState(false);
-  const [isTracking, setIsTracking] = React.useState(false);
-  const intervalRef = React.useRef<number | null>(null);
+  const { id: tripId } = useLocalSearchParams() as any;
+
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [isTracking, setIsTracking] = useState(false);
+  const [locations, setLocations] = useState<any[]>([]);
+
+  const intervalRef = useRef<any>(null);
+  const mapRef = useRef<MapView | null>(null);
 
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
+
       if (status !== "granted") {
-        Alert.alert(
-          "Permission Denied",
-          "Location permission is required to track the bus.",
-        );
+        Alert.alert("Permission Denied", "Location permission required");
         setHasPermission(false);
         return;
       }
+
       setHasPermission(true);
     })();
   }, []);
@@ -31,18 +36,36 @@ const DriverTrackingScreen = () => {
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
       });
+
       const payload = {
         trip_id: Number(tripId),
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
         speed: location.coords.speed ?? 0,
       };
+      console.log("Sending location:", payload);
+
       const res = await tripLocation.create(payload);
-      if (res.status === 200) {
-        console.log("Location sent successfully");
-      }
+      console.log("Location sent successfully", res.data);
+
+      const newLocation = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+
+      setLocations((prev) => [...prev, newLocation]);
+
+      mapRef.current?.animateCamera({
+        center: newLocation,
+        zoom: 16,
+      });
     } catch (error) {
-      console.log("Error sending location:", error);
+      console.log(
+        "Location error:",
+        error?.response?.data ||
+          error?.response?.data?.message ||
+          "Unknown error",
+      );
     }
   };
 
@@ -51,7 +74,9 @@ const DriverTrackingScreen = () => {
       Alert.alert("Trip not found");
       return;
     }
+
     setIsTracking(true);
+
     sendLocationToServer();
 
     intervalRef.current = setInterval(() => {
@@ -64,21 +89,20 @@ const DriverTrackingScreen = () => {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+
     setIsTracking(false);
   };
 
   useEffect(() => {
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, []);
 
   if (hasPermission === null) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size={"large"} color={"green"} />
+        <ActivityIndicator size="large" color="green" />
       </View>
     );
   }
@@ -91,16 +115,66 @@ const DriverTrackingScreen = () => {
     );
   }
 
+  const latest = locations[locations.length - 1];
+
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-        Driver Live Tracking
-      </Text>
-      {!isTracking ? (
-        <Button title="Start Tracking" onPress={startTracking} color="green" />
+    <View style={{ flex: 1 }}>
+      <AppHeader />
+
+      {latest ? (
+        <MapView
+          ref={mapRef}
+          style={{ flex: 1 }}
+          initialRegion={{
+            latitude: latest.latitude,
+            longitude: latest.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}
+        >
+          {/* Route path */}
+          <Polyline
+            coordinates={locations}
+            strokeWidth={4}
+            strokeColor="#15803d"
+          />
+
+          {/* Bus marker */}
+          <Marker coordinate={latest}>
+            <MaterialIcons name="directions-bus" size={36} color="green" />
+          </Marker>
+        </MapView>
       ) : (
-        <Button title="Stop Tracking" onPress={stopTracking} color="red" />
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Text>Waiting for location...</Text>
+        </View>
       )}
+
+      {/* Controls */}
+      <View
+        style={{
+          position: "absolute",
+          bottom: 40,
+          left: 20,
+          right: 20,
+        }}
+      >
+        {!isTracking ? (
+          <Button
+            title="Start Trip Tracking"
+            onPress={startTracking}
+            color="green"
+          />
+        ) : (
+          <Button title="Stop Tracking" onPress={stopTracking} color="red" />
+        )}
+      </View>
     </View>
   );
 };
