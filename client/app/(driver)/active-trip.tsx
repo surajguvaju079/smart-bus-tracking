@@ -1,0 +1,176 @@
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
+import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import AppHeader from "@/components/AppHeader";
+import { trip } from "@/api/trip";
+
+export default function ActiveTrip() {
+  const [trips, setTrips] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    fetchTrips();
+  }, []);
+
+  const fetchTrips = async () => {
+    try {
+      const res = await trip.getByDriver(39);
+
+      const data = res?.data?.responseObject?.trips || [];
+
+      console.log("Fetched trips:", data);
+
+      setTrips(data);
+    } catch (error) {
+      console.log("Error fetching trips:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const goToTracking = (tripId: number) => {
+    router.push(`/driver/tracking?id=${tripId}`);
+  };
+
+  const getStatusColor = (status: string) => {
+    if (status === "PLANNED") return "#2563eb";
+    if (status === "COMPLETED") return "#16a34a";
+    return "#6b7280";
+  };
+
+  const renderTrip = ({ item }: any) => {
+    return (
+      <View
+        style={{
+          backgroundColor: "white",
+          borderRadius: 14,
+          padding: 18,
+          marginBottom: 16,
+          shadowColor: "#000",
+          shadowOpacity: 0.05,
+          shadowRadius: 10,
+          elevation: 3,
+        }}
+      >
+        {/* Route */}
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: "700",
+            marginBottom: 6,
+          }}
+        >
+          {item.startLocationName} → {item.endLocationName}
+        </Text>
+
+        {/* Vehicle */}
+        <Text style={{ color: "#555", marginBottom: 4 }}>
+          Vehicle: {item.vehicleNumber}
+        </Text>
+
+        {/* Start Time */}
+        <Text style={{ color: "#555" }}>
+          Start Time:{" "}
+          {new Date(item.startTime).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </Text>
+
+        {/* Status Badge */}
+        <View
+          style={{
+            marginTop: 10,
+            alignSelf: "flex-start",
+            backgroundColor: getStatusColor(item.status),
+            paddingHorizontal: 10,
+            paddingVertical: 4,
+            borderRadius: 8,
+          }}
+        >
+          <Text style={{ color: "white", fontWeight: "600" }}>
+            {item.status}
+          </Text>
+        </View>
+
+        {/* Start Tracking */}
+        {item.status === "PLANNED" && (
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#16a34a",
+              marginTop: 14,
+              padding: 12,
+              borderRadius: 10,
+              alignItems: "center",
+            }}
+            onPress={() => goToTracking(item.id)}
+          >
+            <Text
+              style={{
+                color: "white",
+                fontWeight: "700",
+              }}
+            >
+              Start Trip
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: "white" }}>
+        <AppHeader />
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <ActivityIndicator size="large" />
+        </View>
+      </View>
+    );
+  }
+
+  if (trips.length === 0) {
+    return (
+      <View style={{ flex: 1, backgroundColor: "white" }}>
+        <AppHeader />
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Text>No trips available</Text>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={{ flex: 1, backgroundColor: "#f3f4f6" }}>
+      <AppHeader />
+
+      <FlatList
+        data={trips}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderTrip}
+        contentContainerStyle={{ padding: 20 }}
+      />
+    </View>
+  );
+}

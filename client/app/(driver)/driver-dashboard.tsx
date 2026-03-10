@@ -1,17 +1,38 @@
-import { View, Text } from "react-native";
-import React from "react";
-import { ScrollView } from "react-native-gesture-handler";
+import { View, Text, Button } from "react-native";
+import { useRouter } from "expo-router";
 import AppHeader from "@/components/AppHeader";
 
-const DriverDashboard = () => {
-  return (
-    <ScrollView className="flex-1 bg-white">
-      <AppHeader />
-      <View className="flex-1 items-center justify-center">
-        <Text className="text-green-700 text-lg">DriverDashboard</Text>
-      </View>
-    </ScrollView>
-  );
-};
+export default function DriverDashboard() {
+  const router = useRouter();
 
-export default DriverDashboard;
+  return (
+    <View style={{ flex: 1, backgroundColor: "white" }}>
+      <AppHeader />
+
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 20,
+        }}
+      >
+        <Text style={{ fontSize: 22, fontWeight: "bold", color: "green" }}>
+          Driver Dashboard
+        </Text>
+
+        <Button
+          title="Start New Trip"
+          onPress={() => router.push("/create-trip")}
+          color="green"
+        />
+
+        <Button
+          title="Active Trip"
+          onPress={() => router.push("/active-trip")}
+          color="green"
+        />
+      </View>
+    </View>
+  );
+}
