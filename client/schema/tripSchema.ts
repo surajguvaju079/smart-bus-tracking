@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 export const createTripSchema = z.object({
-  driver_id: z.number().nonnegative(),
   start_time: z.string(),
   start_location_name: z
     .string()
@@ -13,7 +12,6 @@ export const createTripSchema = z.object({
     .min(3, "End location must be at least 3 letters"),
   end_latitude: z.number(),
   end_longitude: z.number(),
-  vehicle_number: z.string().min(4, "Must be at least 4 digits"),
   end_time: z.string().optional(),
 });
 

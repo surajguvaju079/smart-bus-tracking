@@ -1,9 +1,12 @@
 import { BASE_URL } from "@/constants/BaseUrl";
 import { CreateTripType } from "@/schema/tripSchema";
 import axios from "axios";
-
+interface TripType extends CreateTripType {
+  vehicle_number: string;
+  driver_id: number;
+}
 export const trip = {
-  create: async (data: CreateTripType) => {
+  create: async (data: TripType) => {
     return await axios.post(`${BASE_URL}/trips/create`, data);
   },
   getAll: async (page: number = 1, limit: number = 10) => {

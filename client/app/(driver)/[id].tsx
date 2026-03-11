@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import * as Location from "expo-location";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { tripLocation } from "@/api/trip-location";
 import AppHeader from "@/components/AppHeader";
 

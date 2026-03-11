@@ -22,6 +22,7 @@ import { kathmanduLocations } from "@/constants/KathmanduLocations";
 import { LocationOption } from "@/types/location/location";
 import { createTripSchema, CreateTripType } from "@/schema/tripSchema";
 import { trip } from "@/api/trip";
+import { useUserStore } from "@/store/userStore";
 
 // ─── Icon placeholders (replace with your icon lib e.g. @expo/vector-icons) ───
 const Icon = ({ name }: { name: string }) => {
@@ -83,8 +84,10 @@ const LocationItem = ({
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function CreateTripScreen() {
+  const user = useUserStore((state) => state.user);
   const { createTrip, loading } = useTripStore();
 
+  console.log("Current user in CreateTripScreen:", user);
   const [showStartList, setShowStartList] = useState(false);
   const [showEndList, setShowEndList] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -101,10 +104,15 @@ export default function CreateTripScreen() {
 
   const onSubmit = async (data: CreateTripType) => {
     try {
-      const res = await trip.create(data);
+      const res = await trip.create({
+        ...data,
+        driver_id: user?.driver_id!,
+        vehicle_number: user?.vehicle_number!,
+      });
       if (res.status === 200) {
         Alert.alert("Trip Created", "Your trip has been created successfully!");
       }
+      console.log("Create trip response:", res.data.responseObject);
     } catch (error) {
       console.log("Error creating trip:", error);
     }
@@ -150,64 +158,6 @@ export default function CreateTripScreen() {
 
         {/* ── Form Card ── */}
         <View style={styles.card}>
-          {/* DRIVER ID */}
-          <FieldWrapper
-            label="Driver ID"
-            icon="id"
-            error={errors.driver_id?.message}
-          >
-            <Controller
-              control={control}
-              name="driver_id"
-              render={({ field: { onChange, value } }) => (
-                <View
-                  style={[
-                    styles.inputRow,
-                    errors.driver_id && styles.inputError,
-                  ]}
-                >
-                  <TextInput
-                    placeholder="Enter driver ID"
-                    placeholderTextColor="#4a5a4a"
-                    keyboardType="numeric"
-                    style={styles.input}
-                    value={value?.toString() ?? ""}
-                    onChangeText={(v) => onChange(v ? Number(v) : undefined)}
-                  />
-                </View>
-              )}
-            />
-          </FieldWrapper>
-
-          {/* VEHICLE NUMBER */}
-          <FieldWrapper
-            label="Vehicle Number"
-            icon="car"
-            error={errors.vehicle_number?.message}
-          >
-            <Controller
-              control={control}
-              name="vehicle_number"
-              render={({ field: { onChange, value } }) => (
-                <View
-                  style={[
-                    styles.inputRow,
-                    errors.vehicle_number && styles.inputError,
-                  ]}
-                >
-                  <TextInput
-                    placeholder="e.g. BA 1 CHA 1234"
-                    placeholderTextColor="#4a5a4a"
-                    style={[styles.input, styles.inputUppercase]}
-                    value={value}
-                    onChangeText={(v) => onChange(v.toUpperCase())}
-                    autoCapitalize="characters"
-                  />
-                </View>
-              )}
-            />
-          </FieldWrapper>
-
           {/* START LOCATION */}
           <FieldWrapper
             label="Start Location"
