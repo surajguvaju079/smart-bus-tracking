@@ -43,10 +43,9 @@ const DriverTrackingScreen = () => {
         longitude: location.coords.longitude,
         speed: location.coords.speed ?? 0,
       };
-      console.log("Sending location:", payload);
+      console.log("Sending location to server:", payload);
 
-      const res = await tripLocation.create(payload);
-      console.log("Location sent successfully", res.data);
+      await tripLocation.create(payload);
 
       const newLocation = {
         latitude: location.coords.latitude,

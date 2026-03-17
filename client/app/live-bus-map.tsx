@@ -5,8 +5,9 @@ import AppHeader from "../components/AppHeader";
 import { io } from "socket.io-client";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState, useRef } from "react";
+import { SOCKET_URL } from "@/constants/SocketUrl";
 
-const socket = io("http://192.168.254.33:8080");
+const socket = io(SOCKET_URL);
 
 export default function LiveBusMap() {
   const params = useLocalSearchParams();
@@ -17,8 +18,10 @@ export default function LiveBusMap() {
 
   useEffect(() => {
     if (!tripId) return;
+    console.log("Joining trip room:", tripId);
 
     const handleLocation = (data: any) => {
+      console.log();
       /*   const distance = (lat1, lon1, lat2, lon2) => {
   const R = 6371000;
   const toRad = (v: number) => (v * Math.PI) / 180;
@@ -44,13 +47,13 @@ export default function LiveBusMap() {
 
       //   return [...prev, data];
       // });
-
+      console.log("Received location update:", data);
       setLocations((prev) => [...prev, data]);
     };
 
     socket.emit("join-trip", Number(tripId));
     socket.on("trip:location", handleLocation);
-
+    console.log("Listening for location updates for trip:", tripId);
     socket.on("trip:completed", () => {
       setLocations([]);
     });
@@ -68,7 +71,6 @@ export default function LiveBusMap() {
     );
 
   const latest = locations[locations.length - 1];
-
   return (
     <View style={{ flex: 1 }}>
       <AppHeader />

@@ -17,12 +17,12 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import AppHeader from "@/components/AppHeader";
-import { useTripStore } from "@/store/tripStore";
 import { kathmanduLocations } from "@/constants/KathmanduLocations";
 import { LocationOption } from "@/types/location/location";
 import { createTripSchema, CreateTripType } from "@/schema/tripSchema";
 import { trip } from "@/api/trip";
 import { useUserStore } from "@/store/userStore";
+import { useRouter } from "expo-router";
 
 // ─── Icon placeholders (replace with your icon lib e.g. @expo/vector-icons) ───
 const Icon = ({ name }: { name: string }) => {
@@ -85,9 +85,8 @@ const LocationItem = ({
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function CreateTripScreen() {
   const user = useUserStore((state) => state.user);
-  const { createTrip, loading } = useTripStore();
-
-  console.log("Current user in CreateTripScreen:", user);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const [showStartList, setShowStartList] = useState(false);
   const [showEndList, setShowEndList] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -100,24 +99,28 @@ export default function CreateTripScreen() {
     formState: { errors },
   } = useForm<CreateTripType>({
     resolver: zodResolver(createTripSchema),
+    defaultValues: {
+      start_time: new Date().toISOString(),
+    },
   });
 
   const onSubmit = async (data: CreateTripType) => {
     try {
-      const res = await trip.create({
+      setLoading(true);
+      console.log("Submitting trip data:", data);
+      await trip.create({
         ...data,
         driver_id: user?.driver_id!,
         vehicle_number: user?.vehicle_number!,
       });
-      if (res.status === 200) {
-        Alert.alert("Trip Created", "Your trip has been created successfully!");
-      }
-      console.log("Create trip response:", res.data.responseObject);
+      Alert.alert("Trip Created", "Your trip has been created successfully!");
+
+      router.replace("/driver-dashboard");
     } catch (error) {
       console.log("Error creating trip:", error);
+    } finally {
+      setLoading(false);
     }
-    //    await createTrip(data);
-    console.log("submitted data is", data);
   };
 
   const onTimeChange = (_event: any, selectedDate?: Date) => {
@@ -135,6 +138,10 @@ export default function CreateTripScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0a0f0a" />
       <AppHeader />
+      <View style={styles.driverCard}>
+        <Text style={styles.driverName}>{user?.name}</Text>
+        <Text style={styles.driverVehicle}>{user?.vehicle_number}</Text>
+      </View>
 
       <ScrollView
         style={styles.scroll}
@@ -348,13 +355,35 @@ export default function CreateTripScreen() {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const EMERALD = "#22c55e";
 const EMERALD_DIM = "#16a34a";
-const BG = "#0a0f0a";
-const CARD = "#111811";
-const BORDER = "#1e2e1e";
-const TEXT = "#e8f5e8";
+const BG = "#ffffff";
+const CARD = "#eeeeee";
+const BORDER = "#d1d5db";
+const TEXT = "#cccccc";
 const MUTED = "#6b7f6b";
 
 const styles = StyleSheet.create({
+  driverCard: {
+    marginHorizontal: 20,
+    marginTop: 16,
+    backgroundColor: "#111811",
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#1e2e1e",
+    marginBottom: 20,
+  },
+
+  driverName: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#e8f5e8",
+  },
+
+  driverVehicle: {
+    fontSize: 14,
+    color: "#22c55e",
+    marginTop: 4,
+  },
   container: {
     flex: 1,
     backgroundColor: BG,
@@ -445,7 +474,7 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#0d150d",
+    backgroundColor: "#eeeeee",
     borderWidth: 1,
     borderColor: BORDER,
     borderRadius: 10,

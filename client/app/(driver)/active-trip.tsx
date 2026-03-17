@@ -11,6 +11,8 @@ import AppHeader from "@/components/AppHeader";
 import { trip } from "@/api/trip";
 import { useUserStore } from "@/store/userStore";
 
+import { useCallback } from "react";
+
 export default function ActiveTrip() {
   const user = useUserStore((state) => state.user);
   const [trips, setTrips] = useState<any[]>([]);
@@ -18,15 +20,7 @@ export default function ActiveTrip() {
 
   const router = useRouter();
 
-  useEffect(() => {
-    if (!user?.driver_id) {
-      router.push(`/(auth)/user-login`);
-      return;
-    }
-    fetchTrips();
-  }, []);
-
-  const fetchTrips = async () => {
+  const fetchTrips = useCallback(async () => {
     try {
       const res = await trip.getByDriver(user?.driver_id!);
 
@@ -40,7 +34,15 @@ export default function ActiveTrip() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.driver_id]);
+
+  useEffect(() => {
+    if (!user?.driver_id) {
+      router.push(`/(auth)/user-login`);
+      return;
+    }
+    fetchTrips();
+  }, [fetchTrips, router, user?.driver_id]);
 
   const goToTracking = (tripId: number) => {
     router.push(`/(driver)/${tripId}`);
