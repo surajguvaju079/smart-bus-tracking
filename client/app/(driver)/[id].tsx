@@ -6,15 +6,17 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { tripLocation } from "@/api/trip-location";
 import AppHeader from "@/components/AppHeader";
+import { Route } from "@/api/route";
 
 const DriverTrackingScreen = () => {
-  const { id: tripId } = useLocalSearchParams() as any;
+  const { id: tripId, routeId } = useLocalSearchParams() as any;
 
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [isTracking, setIsTracking] = useState(false);
   const [locations, setLocations] = useState<any[]>([]);
   const [rotation, setRotation] = useState(0);
   const [speed, setSpeed] = useState(0);
+  const [stops, setStops] = useState<any[]>([]);
 
   const intervalRef = useRef<any>(null);
   const mapRef = useRef<MapView | null>(null);
@@ -29,6 +31,7 @@ const DriverTrackingScreen = () => {
     }),
   ).current;
 
+  // 📍 Permission
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -43,14 +46,30 @@ const DriverTrackingScreen = () => {
     })();
   }, []);
 
-  // Rotation
+  // 🗺️ Fetch route stops
+  useEffect(() => {
+    const fetchStops = async () => {
+      try {
+        const res = await Route.show(1);
+        console.log("response from stops", res.data);
+
+        setStops(res?.data?.responseObject.stops || []);
+      } catch (error) {
+        console.log("Error fetching stops:", error);
+      }
+    };
+
+    fetchStops();
+  }, [routeId]);
+
+  // 🔄 Rotation
   const getRotation = (start: any, end: any) => {
     const latDiff = end.latitude - start.latitude;
     const lngDiff = end.longitude - start.longitude;
     return (Math.atan2(lngDiff, latDiff) * 180) / Math.PI;
   };
 
-  // Interpolation
+  // 📈 Interpolation
   const interpolate = (start: any, end: any, steps = 20) => {
     const points = [];
     for (let i = 1; i <= steps; i++) {
@@ -64,7 +83,7 @@ const DriverTrackingScreen = () => {
     return points;
   };
 
-  // Smooth animation
+  // 🎬 Smooth animation
   const animateSmoothly = async (start: any, end: any) => {
     if (isAnimating.current) return;
     isAnimating.current = true;
@@ -87,6 +106,47 @@ const DriverTrackingScreen = () => {
     isAnimating.current = false;
   };
 
+  // 📏 Distance (for next stop)
+  const getDistance = (a: any, b: any) => {
+    const R = 6371000;
+    const toRad = (v: number) => (v * Math.PI) / 180;
+
+    const dLat = toRad(b.latitude - a.latitude);
+    const dLon = toRad(b.longitude - a.longitude);
+
+    const lat1 = toRad(a.latitude);
+    const lat2 = toRad(b.latitude);
+
+    const aVal =
+      Math.sin(dLat / 2) ** 2 +
+      Math.sin(dLon / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
+
+    return 2 * R * Math.atan2(Math.sqrt(aVal), Math.sqrt(1 - aVal));
+  };
+
+  // 🎯 Next stop
+  const getNextStop = () => {
+    if (!locations.length || stops.length === 0) return null;
+
+    const latest = locations[locations.length - 1];
+
+    let minDist = Infinity;
+    let nextStop = null;
+
+    stops.forEach((stop) => {
+      const dist = getDistance(latest, stop);
+      if (dist < minDist) {
+        minDist = dist;
+        nextStop = stop;
+      }
+    });
+
+    return nextStop;
+  };
+
+  const nextStop = getNextStop();
+
+  // 📡 Send location
   const sendLocationToServer = async () => {
     try {
       const location = await Location.getCurrentPositionAsync({
@@ -98,14 +158,12 @@ const DriverTrackingScreen = () => {
         longitude: location.coords.longitude,
       };
 
-      const payload = {
+      await tripLocation.create({
         trip_id: Number(tripId),
         latitude: newLocation.latitude,
         longitude: newLocation.longitude,
         speed: location.coords.speed ?? 0,
-      };
-
-      await tripLocation.create(payload);
+      });
 
       setSpeed(location.coords.speed ?? 0);
 
@@ -113,7 +171,6 @@ const DriverTrackingScreen = () => {
         if (prev.length > 0) {
           const prevLoc = prev[prev.length - 1];
 
-          // 🔥 Smooth interpolation instead of jump
           animateSmoothly(prevLoc, newLocation);
 
           const heading =
@@ -127,7 +184,6 @@ const DriverTrackingScreen = () => {
         return [...prev.slice(-50), newLocation];
       });
 
-      // Camera follow
       mapRef.current?.animateCamera(
         {
           center: newLocation,
@@ -137,11 +193,12 @@ const DriverTrackingScreen = () => {
         },
         { duration: 2000 },
       );
-    } catch (error: any) {
+    } catch (error) {
       console.log("Location error:", error);
     }
   };
 
+  // ▶️ Start
   const startTracking = () => {
     if (!tripId) {
       Alert.alert("Trip not found");
@@ -152,17 +209,12 @@ const DriverTrackingScreen = () => {
 
     sendLocationToServer();
 
-    intervalRef.current = setInterval(() => {
-      sendLocationToServer();
-    }, 4000);
+    intervalRef.current = setInterval(sendLocationToServer, 4000);
   };
 
+  // ⏹ Stop
   const stopTracking = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-
+    if (intervalRef.current) clearInterval(intervalRef.current);
     setIsTracking(false);
   };
 
@@ -172,6 +224,7 @@ const DriverTrackingScreen = () => {
     };
   }, []);
 
+  // ⏳ Loading
   if (hasPermission === null) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -205,39 +258,77 @@ const DriverTrackingScreen = () => {
             longitudeDelta: 0.01,
           }}
         >
+          {/* Live path */}
           <Polyline
             coordinates={locations}
             strokeWidth={4}
             strokeColor="#15803d"
           />
 
+          {/* Planned route */}
+          {stops.length > 0 && (
+            <Polyline
+              coordinates={stops.map((s) => ({
+                latitude: s.latitude,
+                longitude: s.longitude,
+              }))}
+              strokeWidth={3}
+              strokeColor="#000"
+              lineDashPattern={[5, 5]}
+            />
+          )}
+
+          {/* Stops */}
+          {stops.map((stop) => (
+            <Marker
+              key={stop.id}
+              coordinate={{
+                latitude: stop.latitude,
+                longitude: stop.longitude,
+              }}
+              title={stop.name}
+            >
+              <MaterialIcons name="location-on" size={24} color="blue" />
+            </Marker>
+          ))}
+
+          {/* Next Stop */}
+          {nextStop && (
+            <Marker
+              coordinate={{
+                latitude: nextStop.latitude,
+                longitude: nextStop.longitude,
+              }}
+              title={`Next: ${nextStop.name}`}
+            >
+              <MaterialIcons name="flag" size={28} color="red" />
+            </Marker>
+          )}
+
+          {/* Start */}
           {locations.length > 0 && (
             <Marker coordinate={locations[0]} title="Start" pinColor="blue" />
           )}
 
+          {/* Animated vehicle */}
           <Marker.Animated coordinate={animatedCoordinate}>
             <MaterialIcons
               name="near-me"
               size={36}
               color="green"
-              style={{
-                transform: [{ rotate: `${rotation}deg` }],
-              }}
+              style={{ transform: [{ rotate: `${rotation}deg` }] }}
             />
           </Marker.Animated>
         </MapView>
       ) : (
         <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
           <Text>Waiting for location...</Text>
         </View>
       )}
 
+      {/* Speed */}
       <Text
         style={{
           position: "absolute",
@@ -251,6 +342,7 @@ const DriverTrackingScreen = () => {
         Speed: {(speed * 3.6).toFixed(1)} km/h
       </Text>
 
+      {/* Controls */}
       <View
         style={{
           position: "absolute",
