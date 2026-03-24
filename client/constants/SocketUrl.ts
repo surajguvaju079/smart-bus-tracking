@@ -1,3 +1,3 @@
-export const SOCKET_URL = "http://192.168.254.33:8080";
+export const SOCKET_URL = process.env.EXPO_PUBLIC_SOCKET_URL;
 
-// process.env.EXPO_PUBLIC_SOCKET_URL
+// process.env.EXPO_PUBLIC_SOCKET_URL || "http://localhost:8080";

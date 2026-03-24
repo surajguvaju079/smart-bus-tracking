@@ -207,7 +207,7 @@ export default function CreateTripScreen() {
                       <FlatList
                         data={kathmanduLocations}
                         keyExtractor={(item) => item.name}
-                        style={{ maxHeight: 220 }}
+                        style={{}}
                         showsVerticalScrollIndicator={false}
                         renderItem={({ item }) => (
                           <LocationItem
@@ -279,7 +279,7 @@ export default function CreateTripScreen() {
                       <FlatList
                         data={kathmanduLocations}
                         keyExtractor={(item) => item.name}
-                        style={{ maxHeight: 220 }}
+                        style={{}}
                         showsVerticalScrollIndicator={false}
                         renderItem={({ item }) => (
                           <LocationItem

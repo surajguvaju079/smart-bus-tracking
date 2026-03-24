@@ -4,14 +4,13 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
+  Pressable,
 } from "react-native";
 import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import AppHeader from "@/components/AppHeader";
 import { trip } from "@/api/trip";
 import { useUserStore } from "@/store/userStore";
-
-import { useCallback } from "react";
 
 export default function ActiveTrip() {
   const user = useUserStore((state) => state.user);
@@ -20,29 +19,28 @@ export default function ActiveTrip() {
 
   const router = useRouter();
 
-  const fetchTrips = useCallback(async () => {
-    try {
-      const res = await trip.getByDriver(user?.driver_id!);
-
-      const data = res?.data?.responseObject?.trips || [];
-
-      console.log("Fetched trips:", data);
-
-      setTrips(data);
-    } catch (error) {
-      console.log("Error fetching trips:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [user?.driver_id]);
-
   useEffect(() => {
     if (!user?.driver_id) {
       router.push(`/(auth)/user-login`);
       return;
     }
+    const fetchTrips = async () => {
+      try {
+        const res = await trip.getByDriver(user?.driver_id!);
+
+        const data = res?.data?.responseObject?.trips || [];
+
+        console.log("Fetched trips:", data);
+
+        setTrips(data);
+      } catch (error) {
+        console.log("Error fetching trips:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchTrips();
-  }, [fetchTrips, router, user?.driver_id]);
+  }, [router, user?.driver_id]);
 
   const goToTracking = (tripId: number) => {
     router.push(`/(driver)/${tripId}`);
@@ -96,17 +94,46 @@ export default function ActiveTrip() {
         {/* Status Badge */}
         <View
           style={{
-            marginTop: 10,
-            alignSelf: "flex-start",
-            backgroundColor: getStatusColor(item.status),
-            paddingHorizontal: 10,
-            paddingVertical: 4,
-            borderRadius: 8,
+            width: "100%",
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
           }}
         >
-          <Text style={{ color: "white", fontWeight: "600" }}>
-            {item.status}
-          </Text>
+          <View
+            style={{
+              marginTop: 10,
+              alignSelf: "flex-start",
+              backgroundColor: getStatusColor(item.status),
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              borderRadius: 8,
+            }}
+          >
+            <Text style={{ color: "white", fontWeight: "600" }}>
+              {item.status}
+            </Text>
+          </View>
+          <Pressable
+            style={{
+              marginTop: 10,
+              alignSelf: "flex-end",
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              borderRadius: 8,
+              backgroundColor: "#145689",
+            }}
+            onPress={() => router.replace("/create-route-screen")}
+          >
+            <Text
+              style={{
+                color: "#fff",
+                fontWeight: 600,
+              }}
+            >
+              + Add Routes
+            </Text>
+          </Pressable>
         </View>
 
         {/* Start Tracking */}

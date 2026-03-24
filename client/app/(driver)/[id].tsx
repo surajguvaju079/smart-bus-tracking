@@ -9,7 +9,7 @@ import AppHeader from "@/components/AppHeader";
 import { Route } from "@/api/route";
 
 const DriverTrackingScreen = () => {
-  const { id: tripId, routeId } = useLocalSearchParams() as any;
+  const { id } = useLocalSearchParams() as any;
 
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [isTracking, setIsTracking] = useState(false);
@@ -50,7 +50,7 @@ const DriverTrackingScreen = () => {
   useEffect(() => {
     const fetchStops = async () => {
       try {
-        const res = await Route.show(1);
+        const res = await Route.show(Number(id));
         console.log("response from stops", res.data);
 
         setStops(res?.data?.responseObject.stops || []);
@@ -60,7 +60,7 @@ const DriverTrackingScreen = () => {
     };
 
     fetchStops();
-  }, [routeId]);
+  }, [id]);
 
   // 🔄 Rotation
   const getRotation = (start: any, end: any) => {
@@ -159,7 +159,7 @@ const DriverTrackingScreen = () => {
       };
 
       await tripLocation.create({
-        trip_id: Number(tripId),
+        trip_id: Number(id),
         latitude: newLocation.latitude,
         longitude: newLocation.longitude,
         speed: location.coords.speed ?? 0,
@@ -200,7 +200,7 @@ const DriverTrackingScreen = () => {
 
   // ▶️ Start
   const startTracking = () => {
-    if (!tripId) {
+    if (!id) {
       Alert.alert("Trip not found");
       return;
     }
@@ -272,9 +272,9 @@ const DriverTrackingScreen = () => {
                 latitude: s.latitude,
                 longitude: s.longitude,
               }))}
-              strokeWidth={3}
-              strokeColor="#000"
-              lineDashPattern={[5, 5]}
+              strokeWidth={5}
+              strokeColor="#aa2222"
+              // lineDashPattern={[5, 5]}
             />
           )}
 
