@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet } from "react-native";
 import { useState, useEffect } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -23,17 +16,12 @@ export default function LiveBusDashboard() {
 
   const fetchBuses = async () => {
     setLoading(true);
-
     try {
       const res = await trip.getAll();
-
       if (res.status === 200) {
         const trips = res.data.responseObject.trips;
-
-        console.log("Fetched trips:", trips);
-
         const updatedBuses = trips
-          .filter((trip: any) => trip.status !== "COMPLETED") // show only active
+          .filter((trip: any) => trip.status !== "COMPLETED")
           .map((trip: any) => ({
             id: trip.id,
             busNo: trip.vehicleNumber,
@@ -42,69 +30,59 @@ export default function LiveBusDashboard() {
             lng: Number(trip.startLongitude),
             status: trip.status === "PLANNED" ? "Scheduled" : "Live",
           }));
-
         setBuses(updatedBuses);
       }
     } catch (error) {
       console.error("Error fetching buses:", error);
-      Alert.alert("Error", "Failed to fetch buses");
+      alert("Failed to fetch buses");
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading)
+  if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size={"large"} color={"green"} />
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#15803d" />
       </View>
     );
+  }
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView style={styles.container}>
       <AppHeader />
 
-      <View className="px-5 mt-6">
-        <Text className="text-2xl font-bold text-green-700 text-center">
-          Live Bus Dashboard
-        </Text>
+      <View style={styles.content}>
+        <Text style={styles.title}>Live Bus Dashboard</Text>
 
         {buses.length === 0 && (
-          <View className="mt-10 items-center">
-            <Text className="text-gray-500 text-base">
-              No active buses available
-            </Text>
+          <View style={styles.noBuses}>
+            <Text style={styles.noBusesText}>No active buses available</Text>
           </View>
         )}
 
         {buses.map((bus) => (
-          <View
-            key={bus.id}
-            className="flex-row justify-between items-center bg-green-50 border border-green-200 rounded-xl p-4 mt-4"
-          >
-            <View className="flex-row items-center">
+          <View key={bus.id} style={styles.busCard}>
+            <View style={styles.busInfo}>
               <MaterialIcons name="directions-bus" size={28} color="#15803d" />
-
-              <View className="ml-3">
-                <Text className="text-green-800 font-semibold text-lg">
-                  Bus {bus.busNo}
-                </Text>
-
-                <Text className="text-gray-700 text-sm">{bus.route}</Text>
+              <View style={styles.busText}>
+                <Text style={styles.busNumber}>Bus {bus.busNo}</Text>
+                <Text style={styles.busRoute}>{bus.route}</Text>
               </View>
             </View>
 
-            <View className="items-end">
+            <View style={styles.busActions}>
               <Text
-                className={`text-xs font-semibold ${
-                  bus.status === "Live" ? "text-green-700" : "text-yellow-600"
-                }`}
+                style={[
+                  styles.busStatus,
+                  bus.status === "Live" ? styles.statusLive : styles.statusScheduled,
+                ]}
               >
                 {bus.status}
               </Text>
 
               <TouchableOpacity
-                className="bg-green-700 px-3 py-1 mt-2 rounded-lg"
+                style={styles.trackButton}
                 onPress={() =>
                   router.push({
                     pathname: "/live-bus-map",
@@ -112,7 +90,7 @@ export default function LiveBusDashboard() {
                   })
                 }
               >
-                <Text className="text-white font-semibold text-sm">Track</Text>
+                <Text style={styles.trackButtonText}>Track</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -121,3 +99,86 @@ export default function LiveBusDashboard() {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+  },
+  loader: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  content: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#15803d",
+    textAlign: "center",
+  },
+  noBuses: {
+    marginTop: 40,
+    alignItems: "center",
+  },
+  noBusesText: {
+    color: "#6b7280",
+    fontSize: 16,
+  },
+  busCard: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#d1fae5",
+    borderWidth: 1,
+    borderColor: "#bbf7d0",
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 16,
+  },
+  busInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  busText: {
+    marginLeft: 12,
+  },
+  busNumber: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#065f46",
+  },
+  busRoute: {
+    fontSize: 14,
+    color: "#374151",
+    marginTop: 2,
+  },
+  busActions: {
+    alignItems: "flex-end",
+  },
+  busStatus: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  statusLive: {
+    color: "#15803d",
+  },
+  statusScheduled: {
+    color: "#ca8a04",
+  },
+  trackButton: {
+    backgroundColor: "#15803d",
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  trackButtonText: {
+    color: "#ffffff",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+});

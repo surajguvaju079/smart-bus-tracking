@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
@@ -30,100 +31,167 @@ export default function DriverRegister() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView style={styles.container}>
       <AppHeader />
 
-      <View className="px-6 mt-6">
+      <View style={styles.content}>
         {/* Profile Image */}
-        <View className="items-center">
-          <TouchableOpacity
-            onPress={pickImage}
-            className="w-28 h-28 rounded-full border-2 border-green-600 items-center justify-center"
-          >
+        <View style={styles.center}>
+          <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
             {image ? (
-              <Image
-                source={{ uri: image }}
-                className="w-full h-full rounded-full"
-              />
+              <Image source={{ uri: image }} style={styles.image} />
             ) : (
               <MaterialIcons name="camera-alt" size={32} color="#15803d" />
             )}
           </TouchableOpacity>
 
-          <Text className="mt-2 text-green-700 text-sm">
-            Upload Profile Photo
-          </Text>
+          <Text style={styles.uploadText}>Upload Profile Photo</Text>
         </View>
 
         {/* Title */}
-        <Text className="text-2xl font-bold text-green-700 text-center mt-6">
-          Driver Registration
-        </Text>
+        <Text style={styles.title}>Driver Registration</Text>
 
         {/* Driver Name */}
-        <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-6">
+        <View style={styles.inputContainer}>
           <MaterialIcons name="person" size={22} color="#15803d" />
-          <TextInput
-            placeholder="Driver Name"
-            className="ml-3 flex-1 text-base"
-          />
+          <TextInput placeholder="Driver Name" style={styles.input} />
         </View>
 
         {/* Mobile Number */}
-        <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-4">
+        <View style={styles.inputContainer}>
           <MaterialIcons name="phone" size={22} color="#15803d" />
           <TextInput
             placeholder="Mobile Number"
             keyboardType="phone-pad"
-            className="ml-3 flex-1 text-base"
+            style={styles.input}
           />
         </View>
 
         {/* Vehicle Number */}
-        <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-4">
+        <View style={styles.inputContainer}>
           <MaterialIcons name="directions-bus" size={22} color="#15803d" />
-          <TextInput
-            placeholder="Vehicle Number"
-            className="ml-3 flex-1 text-base"
-          />
+          <TextInput placeholder="Vehicle Number" style={styles.input} />
         </View>
 
         {/* Route */}
-        <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-4">
+        <View style={styles.inputContainer}>
           <Ionicons name="git-network-outline" size={22} color="#15803d" />
           <TextInput
             placeholder="Route (e.g. Ratnapark - Kalanki)"
-            className="ml-3 flex-1 text-base"
+            style={styles.input}
           />
         </View>
 
         {/* Password */}
-        <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-4">
+        <View style={styles.inputContainer}>
           <MaterialIcons name="lock" size={22} color="#15803d" />
           <TextInput
             placeholder="Password"
             secureTextEntry
-            className="ml-3 flex-1 text-base"
+            style={styles.input}
           />
         </View>
 
         {/* Register Button */}
-        <TouchableOpacity className="bg-green-700 py-3 rounded-lg mt-7">
-          <Text className="text-white text-center font-semibold text-lg">
-            Register Driver
-          </Text>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>Register Driver</Text>
         </TouchableOpacity>
 
         {/* Login Link */}
         <TouchableOpacity
           onPress={() => router.push("/user-login")}
-          className="mt-5 mb-10"
+          style={styles.loginLink}
         >
-          <Text className="text-center text-green-700">
-            Already registered? Login
-          </Text>
+          <Text style={styles.loginText}>Already registered? Login</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+  },
+
+  content: {
+    paddingHorizontal: 24,
+    marginTop: 24,
+  },
+
+  center: {
+    alignItems: "center",
+  },
+
+  imagePicker: {
+    width: 112,
+    height: 112,
+    borderRadius: 56,
+    borderWidth: 2,
+    borderColor: "#16a34a",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  image: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 56,
+  },
+
+  uploadText: {
+    marginTop: 8,
+    color: "#15803d",
+    fontSize: 14,
+  },
+
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#15803d",
+    textAlign: "center",
+    marginTop: 24,
+  },
+
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#86efac",
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginTop: 16,
+  },
+
+  input: {
+    marginLeft: 12,
+    flex: 1,
+    fontSize: 16,
+  },
+
+  button: {
+    backgroundColor: "#15803d",
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 28,
+  },
+
+  buttonText: {
+    color: "#ffffff",
+    textAlign: "center",
+    fontWeight: "600",
+    fontSize: 18,
+  },
+
+  loginLink: {
+    marginTop: 20,
+    marginBottom: 40,
+  },
+
+  loginText: {
+    textAlign: "center",
+    color: "#15803d",
+  },
+});

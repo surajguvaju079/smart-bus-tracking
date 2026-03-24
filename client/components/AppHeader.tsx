@@ -1,15 +1,35 @@
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 
-// Figma-style Green Header
 export default function AppHeader() {
   return (
-    <View className="bg-green-700 px-5 py-10 rounded-b-3xl">
-      <Text className="text-white text-2xl font-bold text-center">
-        Smart Bus System
-      </Text>
-      <Text className="text-green-100 text-sm text-center mt-2">
+    <View style={styles.header}>
+      <Text style={styles.title}>Smart Bus System</Text>
+      <Text style={styles.subtitle}>
         AI-powered public transportation app with real-time tracking
       </Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    backgroundColor: "#15803d", // green-700
+    paddingHorizontal: 20,
+    paddingVertical: 40,
+    borderBottomLeftRadius: 36,
+    borderBottomRightRadius: 36,
+    alignItems: "center",
+  },
+  title: {
+    color: "#ffffff",
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  subtitle: {
+    color: "#d1fae5", // green-100
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 8,
+  },
+});

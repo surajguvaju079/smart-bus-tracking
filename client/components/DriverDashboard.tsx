@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
 type Driver = {
@@ -49,47 +49,47 @@ export default function DriverDashboard() {
   );
 
   return (
-    <ScrollView className="flex-1 bg-green-50 px-5 py-4">
-      <Text className="text-2xl font-bold text-green-700 mb-4 text-center">Driver Dashboard</Text>
+    <ScrollView style={styles.container}>
+      <Text style={styles.header}>Driver Dashboard</Text>
 
       {/* Search */}
-      <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-2 mb-4">
+      <View style={styles.searchBox}>
         <MaterialIcons name="search" size={24} color="#166534" />
         <TextInput
           placeholder="Search driver by name, bus no or route"
-          className="ml-3 flex-1 text-gray-700"
+          style={styles.searchInput}
           value={search}
           onChangeText={setSearch}
         />
       </View>
 
       {/* Add Driver */}
-      <View className="bg-green-100 p-4 rounded-xl mb-6">
-        <Text className="text-lg font-semibold text-green-700 mb-3">Add New Driver</Text>
-        <TextInput placeholder="Driver Name" className="border border-green-300 rounded-lg px-3 py-2 mb-2" value={name} onChangeText={setName} />
-        <TextInput placeholder="Bus No" className="border border-green-300 rounded-lg px-3 py-2 mb-2" value={busNo} onChangeText={setBusNo} />
-        <TextInput placeholder="Vehicle No" className="border border-green-300 rounded-lg px-3 py-2 mb-2" value={vehicleNo} onChangeText={setVehicleNo} />
-        <TextInput placeholder="Route" className="border border-green-300 rounded-lg px-3 py-2 mb-2" value={route} onChangeText={setRoute} />
-        <TextInput placeholder="Mobile Number" className="border border-green-300 rounded-lg px-3 py-2 mb-2" value={mobile} onChangeText={setMobile} />
-        <TouchableOpacity className="bg-green-700 py-3 rounded-lg mt-2" onPress={addDriver}>
-          <Text className="text-white text-center font-semibold">Add Driver</Text>
+      <View style={styles.addCard}>
+        <Text style={styles.addTitle}>Add New Driver</Text>
+        <TextInput style={styles.input} placeholder="Driver Name" value={name} onChangeText={setName} />
+        <TextInput style={styles.input} placeholder="Bus No" value={busNo} onChangeText={setBusNo} />
+        <TextInput style={styles.input} placeholder="Vehicle No" value={vehicleNo} onChangeText={setVehicleNo} />
+        <TextInput style={styles.input} placeholder="Route" value={route} onChangeText={setRoute} />
+        <TextInput style={styles.input} placeholder="Mobile Number" value={mobile} onChangeText={setMobile} />
+        <TouchableOpacity style={styles.addBtn} onPress={addDriver}>
+          <Text style={styles.addBtnText}>Add Driver</Text>
         </TouchableOpacity>
       </View>
 
       {/* Driver List */}
-      <View className="bg-white rounded-xl p-4 shadow">
-        <Text className="text-lg font-semibold text-green-700 mb-3">Driver List ({filteredDrivers.length})</Text>
+      <View style={styles.listCard}>
+        <Text style={styles.listTitle}>Driver List ({filteredDrivers.length})</Text>
         {filteredDrivers.length === 0 ? (
-          <Text className="text-gray-600 text-center py-4">No drivers found</Text>
+          <Text style={styles.noData}>No drivers found</Text>
         ) : (
           filteredDrivers.map((d) => (
-            <View key={d.id} className="flex-row justify-between items-center p-3 border-b border-green-200">
+            <View key={d.id} style={styles.driverRow}>
               <View>
-                <Text className="text-green-700 font-semibold">{d.name}</Text>
-                <Text className="text-gray-700 text-sm">{d.busNo} | {d.vehicleNo}</Text>
-                <Text className="text-gray-700 text-sm">{d.route}</Text>
+                <Text style={styles.driverName}>{d.name}</Text>
+                <Text style={styles.driverInfo}>{d.busNo} | {d.vehicleNo}</Text>
+                <Text style={styles.driverInfo}>{d.route}</Text>
               </View>
-              <Text className="text-gray-700 text-sm">{d.mobile}</Text>
+              <Text style={styles.driverInfo}>{d.mobile}</Text>
             </View>
           ))
         )}
@@ -97,3 +97,104 @@ export default function DriverDashboard() {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#dcfce7", // green-50
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#15803d",
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  searchBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#a7f3d0", // green-300
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 16,
+  },
+  searchInput: {
+    marginLeft: 12,
+    flex: 1,
+    fontSize: 14,
+    color: "#166534",
+  },
+  addCard: {
+    backgroundColor: "#bbf7d0", // green-100
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 24,
+  },
+  addTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#15803d",
+    marginBottom: 12,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#a7f3d0",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 8,
+    color: "#065f46",
+  },
+  addBtn: {
+    backgroundColor: "#15803d",
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginTop: 4,
+    alignItems: "center",
+  },
+  addBtnText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+  listCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  listTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#15803d",
+    marginBottom: 12,
+  },
+  noData: {
+    textAlign: "center",
+    color: "#4b5563",
+    paddingVertical: 16,
+  },
+  driverRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderColor: "#bbf7d0",
+  },
+  driverName: {
+    fontWeight: "600",
+    color: "#15803d",
+    fontSize: 14,
+  },
+  driverInfo: {
+    fontSize: 12,
+    color: "#374151",
+  },
+});

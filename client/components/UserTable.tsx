@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
-import { View, Text, ScrollView, Alert } from "react-native";
+import { View, Text, ScrollView, Alert, StyleSheet } from "react-native";
 import { User } from "../api/user";
 import { useUserStore } from "@/store/userStore";
+
 interface Bus {
   id: number;
   busNo: string;
@@ -32,63 +33,101 @@ export default function UserTable() {
       console.log("error fetching users:", error?.response?.data?.message);
     }
   };
+
+  if (!users || users.length === 0) {
+    return (
+      <View style={styles.noUsersContainer}>
+        <Text style={styles.noUsersText}>No Users Found</Text>
+      </View>
+    );
+  }
+
   return (
-    <View className="mt-6 bg-green-50 rounded-xl p-4 shadow">
-      <Text className="text-green-700 font-bold mb-2">Users</Text>
+    <View style={styles.container}>
+      <Text style={styles.header}>Users</Text>
       <ScrollView horizontal>
         <View>
           {/* Table Header */}
-          <View className="flex-row bg-green-100 p-2 rounded-t-xl">
-            <Text className="w-20 font-bold text-green-800">S.N.</Text>
-            <Text
-              className="w-40 font-bold text-green-800"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              Name
-            </Text>
-            <Text
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              className="w-60 font-bold text-green-800"
-            >
-              Email
-            </Text>
+          <View style={styles.tableHeader}>
+            <Text style={[styles.headerCell, { width: 50 }]}>S.N.</Text>
+            <Text style={[styles.headerCell, { width: 120 }]}>Name</Text>
+            <Text style={[styles.headerCell, { width: 200 }]}>Email</Text>
           </View>
 
           {/* Table Rows */}
-          {users?.length > 0 &&
-            users.map((user) => (
-              <View
-                key={user.id}
-                className="flex-row p-2 border-b border-green-200"
+          {users.map((user) => (
+            <View key={user.id} style={styles.tableRow}>
+              <Text style={[styles.cell, { width: 50 }]}>{user.id}</Text>
+              <Text
+                style={[styles.cell, { width: 120 }]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
               >
-                <Text className="w-20 text-green-700">{user.id}</Text>
-                <Text
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                  className="w-60 text-green-700"
-                >
-                  {user.name}
-                </Text>
-                <Text
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                  className="w-20 text-green-700"
-                >
-                  {user.email}
-                </Text>
-              </View>
-            ))}
-          {users?.length === 0 && (
-            <View className="flex-1 item-center justify-center">
-              <Text className="font-extrabold text-3xl text-red-600">
-                No Users Found
+                {user.name}
+              </Text>
+              <Text
+                style={[styles.cell, { width: 200 }]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {user.email}
               </Text>
             </View>
-          )}
+          ))}
         </View>
       </ScrollView>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    marginTop: 16,
+    backgroundColor: "#ecfdf5", // Tailwind green-50
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  header: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#15803d", // Tailwind green-700
+    marginBottom: 8,
+  },
+  tableHeader: {
+    flexDirection: "row",
+    backgroundColor: "#d1fae5", // Tailwind green-100
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  headerCell: {
+    fontWeight: "bold",
+    color: "#065f46", // Tailwind green-800
+  },
+  tableRow: {
+    flexDirection: "row",
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "#bbf7d0", // Tailwind green-200
+  },
+  cell: {
+    color: "#15803d", // Tailwind green-700
+  },
+  noUsersContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  noUsersText: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#dc2626", // Tailwind red-600
+  },
+});

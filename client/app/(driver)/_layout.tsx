@@ -28,7 +28,7 @@ export default function TabLayout() {
         name="driver-dashboard"
         options={{
           title: "Dashboard",
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <MaterialIcons name="home" size={size} color={color} />
           ),
         }}
@@ -38,7 +38,7 @@ export default function TabLayout() {
         name="active-trip"
         options={{
           title: "Active Trip",
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <MaterialIcons name="map" size={size} color={color} />
           ),
         }}
@@ -48,7 +48,7 @@ export default function TabLayout() {
         name="create-trip"
         options={{
           title: "Create Trip",
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <MaterialIcons name="alt-route" size={size} color={color} />
           ),
         }}
@@ -58,7 +58,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <MaterialIcons name="person" size={size} color={color} />
           ),
         }}

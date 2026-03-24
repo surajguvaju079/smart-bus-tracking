@@ -5,11 +5,11 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { User } from "../../api/user";
-
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema } from "../../schema/userSchema";
@@ -47,7 +47,6 @@ export default function UserRegister() {
         router.replace("/user-login");
       }
     } catch (error: any) {
-      console.log("Register error:", error.response?.data);
       if (error.response?.status === 409) {
         Alert.alert("Register Failed", "Email already exists");
       } else {
@@ -57,121 +56,96 @@ export default function UserRegister() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 bg-white">
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
         <AppHeader />
-        <View className="px-6 mt-12">
-          <Text className="text-2xl font-bold text-green-700 text-center">
-            User Registration
-          </Text>
+
+        <View style={styles.content}>
+          <Text style={styles.title}>User Registration</Text>
 
           {/* Name */}
           <Controller
             control={control}
             name="name"
             render={({ field: { value, onChange } }) => (
-              <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-8">
+              <View style={styles.inputContainer}>
                 <MaterialIcons name="person" size={22} color="#15803d" />
                 <TextInput
                   placeholder="Full Name"
-                  className="ml-3 flex-1"
+                  style={styles.input}
                   value={value}
                   onChangeText={onChange}
                 />
               </View>
             )}
           />
-          {errors.name && (
-            <Text className="text-red-500">{errors.name.message}</Text>
-          )}
+          {errors.name && <Text style={styles.errorText}>{errors.name.message}</Text>}
 
           {/* Email */}
           <Controller
             control={control}
             name="email"
             render={({ field: { value, onChange } }) => (
-              <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-4">
+              <View style={styles.inputContainer}>
                 <MaterialIcons name="email" size={22} color="#15803d" />
                 <TextInput
                   placeholder="Email"
                   keyboardType="email-address"
                   autoCapitalize="none"
-                  className="ml-3 flex-1"
+                  style={styles.input}
                   value={value}
                   onChangeText={onChange}
                 />
               </View>
             )}
           />
-          {errors.email && (
-            <Text className="text-red-500">{errors.email.message}</Text>
-          )}
+          {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
 
           {/* Password */}
           <Controller
             control={control}
             name="password"
             render={({ field: { value, onChange } }) => (
-              <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-4">
+              <View style={styles.inputContainer}>
                 <MaterialIcons name="lock" size={22} color="#15803d" />
                 <TextInput
                   placeholder="Password (min 6 chars)"
                   secureTextEntry
-                  className="ml-3 flex-1"
+                  style={styles.input}
                   value={value}
                   onChangeText={onChange}
                 />
               </View>
             )}
           />
-          {errors.password && (
-            <Text className="text-red-500">{errors.password.message}</Text>
-          )}
+          {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
 
+          {/* Register Button */}
           <TouchableOpacity
             onPress={handleSubmit(onSubmit)}
             disabled={isSubmitting}
-            className="bg-green-700 py-3 rounded-lg mt-6"
+            style={styles.button}
           >
             {isSubmitting ? (
               <ActivityIndicator color="#ffffff" />
             ) : (
-              <Text className="text-white text-center font-semibold text-lg">
-                Register
-              </Text>
+              <Text style={styles.buttonText}>Register</Text>
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => router.push("/user-login")}
-            className="mt-5"
-          >
-            <View className="flex-row items-center justify-center">
-              <Text className="text-center text-green-700 ">
-                Already have an account?{" "}
-              </Text>
-              <Text
-                style={{ textDecorationLine: "underline" }}
-                className="text-center text-green-700 font-semibold"
-              >
-                Login
-              </Text>
+          {/* Login */}
+          <TouchableOpacity onPress={() => router.push("/user-login")} style={styles.link}>
+            <View style={styles.rowCenter}>
+              <Text style={styles.linkText}>Already have an account? </Text>
+              <Text style={styles.linkBold}>Login</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => router.push("/driver-register")}
-            className="mt-5"
-          >
-            <View className="flex-row items-center justify-center">
-              <Text className="text-center text-green-700 ">
-                Join as a Driver?{" "}
-              </Text>
-              <Text
-                style={{ textDecorationLine: "underline" }}
-                className="text-center text-green-700 font-semibold"
-              >
-                Register here
-              </Text>
+
+          {/* Driver Register */}
+          <TouchableOpacity onPress={() => router.push("/driver-register")} style={styles.link}>
+            <View style={styles.rowCenter}>
+              <Text style={styles.linkText}>Join as a Driver? </Text>
+              <Text style={styles.linkBold}>Register here</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -179,3 +153,84 @@ export default function UserRegister() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+  },
+
+  container: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+  },
+
+  content: {
+    paddingHorizontal: 24,
+    marginTop: 48,
+  },
+
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#15803d",
+    textAlign: "center",
+  },
+
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#86efac",
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginTop: 16,
+  },
+
+  input: {
+    marginLeft: 12,
+    flex: 1,
+    fontSize: 16,
+  },
+
+  button: {
+    backgroundColor: "#15803d",
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 24,
+  },
+
+  buttonText: {
+    color: "#ffffff",
+    textAlign: "center",
+    fontWeight: "600",
+    fontSize: 18,
+  },
+
+  link: {
+    marginTop: 20,
+  },
+
+  rowCenter: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  linkText: {
+    color: "#15803d",
+    textAlign: "center",
+  },
+
+  linkBold: {
+    color: "#15803d",
+    fontWeight: "600",
+    textDecorationLine: "underline",
+  },
+
+  errorText: {
+    color: "#ef4444",
+    marginTop: 4,
+  },
+});
