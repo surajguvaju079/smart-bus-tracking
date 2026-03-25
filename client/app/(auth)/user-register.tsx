@@ -16,6 +16,9 @@ import { registerSchema } from "../../schema/userSchema";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppHeader from "@/components/AppHeader";
 
+// ✅ IMPORT HERE (TOP LEVEL)
+import { BASE_URL } from "@/constants/BaseUrl";
+
 type RegisterForm = {
   name: string;
   email: string;
@@ -36,6 +39,9 @@ export default function UserRegister() {
 
   const onSubmit = async (data: RegisterForm) => {
     try {
+      // ✅ use here
+      console.log("Base URL:", BASE_URL);
+
       const res = await User.register({
         name: data.name.trim(),
         email: data.email.trim().toLowerCase(),
@@ -47,8 +53,9 @@ export default function UserRegister() {
         router.replace("/user-login");
       }
     } catch (error: any) {
-      console.log("Register error:", error.response?.data);
-      if (error.response?.status === 409) {
+      console.log("Register error:", error?.response?.data);
+
+      if (error?.response?.status === 409) {
         Alert.alert("Register Failed", "Email already exists");
       } else {
         Alert.alert("Error", "Something went wrong");
@@ -60,6 +67,7 @@ export default function UserRegister() {
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 bg-white">
         <AppHeader />
+
         <View className="px-6 mt-12">
           <Text className="text-2xl font-bold text-green-700 text-center">
             User Registration
@@ -128,6 +136,7 @@ export default function UserRegister() {
             <Text className="text-red-500">{errors.password.message}</Text>
           )}
 
+          {/* Button */}
           <TouchableOpacity
             onPress={handleSubmit(onSubmit)}
             disabled={isSubmitting}
@@ -142,34 +151,31 @@ export default function UserRegister() {
             )}
           </TouchableOpacity>
 
+          {/* Login */}
           <TouchableOpacity
             onPress={() => router.push("/user-login")}
             className="mt-5"
           >
-            <View className="flex-row items-center justify-center">
-              <Text className="text-center text-green-700 ">
+            <View className="flex-row justify-center">
+              <Text className="text-green-700">
                 Already have an account?{" "}
               </Text>
-              <Text
-                style={{ textDecorationLine: "underline" }}
-                className="text-center text-green-700 font-semibold"
-              >
+              <Text className="text-green-700 font-semibold underline">
                 Login
               </Text>
             </View>
           </TouchableOpacity>
+
+          {/* Driver */}
           <TouchableOpacity
             onPress={() => router.push("/driver-register")}
             className="mt-5"
           >
-            <View className="flex-row items-center justify-center">
-              <Text className="text-center text-green-700 ">
+            <View className="flex-row justify-center">
+              <Text className="text-green-700">
                 Join as a Driver?{" "}
               </Text>
-              <Text
-                style={{ textDecorationLine: "underline" }}
-                className="text-center text-green-700 font-semibold"
-              >
+              <Text className="text-green-700 font-semibold underline">
                 Register here
               </Text>
             </View>

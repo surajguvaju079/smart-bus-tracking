@@ -5,16 +5,26 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Alert,
+  StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import AppHeader from "@/components/AppHeader";
+import { driver } from "@/api/driver";
 
 export default function DriverRegister() {
   const router = useRouter();
+
   const [image, setImage] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [vehicleNumber, setVehicleNumber] = useState("");
+  const [licenseNumber, setLicenseNumber] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -29,97 +39,123 @@ export default function DriverRegister() {
     }
   };
 
+  const handleRegister = async () => {
+    if (!name || !email || !vehicleNumber || !licenseNumber || !password) {
+      return Alert.alert("Error", "All fields are required");
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await driver.create({
+        name,
+        email,
+        password,
+        vehicle_number: vehicleNumber,
+        license_number: licenseNumber,
+        profile_image: image || "",
+      });
+
+      if (res.data.success) {
+        Alert.alert("Success", "Driver registered successfully");
+        router.push("/user-login");
+      }
+    } catch (error: any) {
+      console.log(error.response?.data);
+
+      Alert.alert(
+        "Error",
+        error.response?.data?.error?.message || "Something went wrong"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView style={styles.container}>
       <AppHeader />
 
-      <View className="px-6 mt-6">
-        {/* Profile Image */}
-        <View className="items-center">
-          <TouchableOpacity
-            onPress={pickImage}
-            className="w-28 h-28 rounded-full border-2 border-green-600 items-center justify-center"
-          >
+      <View style={styles.inner}>
+        {/* Image */}
+        <View style={styles.center}>
+          <TouchableOpacity style={styles.imageBox} onPress={pickImage}>
             {image ? (
-              <Image
-                source={{ uri: image }}
-                className="w-full h-full rounded-full"
-              />
+              <Image source={{ uri: image }} style={styles.image} />
             ) : (
               <MaterialIcons name="camera-alt" size={32} color="#15803d" />
             )}
           </TouchableOpacity>
-
-          <Text className="mt-2 text-green-700 text-sm">
-            Upload Profile Photo
-          </Text>
+          <Text style={styles.uploadText}>Upload Profile Photo</Text>
         </View>
 
-        {/* Title */}
-        <Text className="text-2xl font-bold text-green-700 text-center mt-6">
-          Driver Registration
-        </Text>
+        <Text style={styles.title}>Driver Registration</Text>
 
-        {/* Driver Name */}
-        <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-6">
+        {/* Inputs */}
+        <View style={styles.inputBox}>
           <MaterialIcons name="person" size={22} color="#15803d" />
           <TextInput
             placeholder="Driver Name"
-            className="ml-3 flex-1 text-base"
+            style={styles.input}
+            value={name}
+            onChangeText={setName}
           />
         </View>
 
-        {/* Mobile Number */}
-        <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-4">
-          <MaterialIcons name="phone" size={22} color="#15803d" />
+        <View style={styles.inputBox}>
+          <MaterialIcons name="email" size={22} color="#15803d" />
           <TextInput
-            placeholder="Mobile Number"
-            keyboardType="phone-pad"
-            className="ml-3 flex-1 text-base"
+            placeholder="Email"
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
           />
         </View>
 
-        {/* Vehicle Number */}
-        <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-4">
+        <View style={styles.inputBox}>
           <MaterialIcons name="directions-bus" size={22} color="#15803d" />
           <TextInput
             placeholder="Vehicle Number"
-            className="ml-3 flex-1 text-base"
+            style={styles.input}
+            value={vehicleNumber}
+            onChangeText={setVehicleNumber}
           />
         </View>
 
-        {/* Route */}
-        <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-4">
-          <Ionicons name="git-network-outline" size={22} color="#15803d" />
+        <View style={styles.inputBox}>
+          <Ionicons name="card-outline" size={22} color="#15803d" />
           <TextInput
-            placeholder="Route (e.g. Ratnapark - Kalanki)"
-            className="ml-3 flex-1 text-base"
+            placeholder="License Number"
+            style={styles.input}
+            value={licenseNumber}
+            onChangeText={setLicenseNumber}
           />
         </View>
 
-        {/* Password */}
-        <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-4">
+        <View style={styles.inputBox}>
           <MaterialIcons name="lock" size={22} color="#15803d" />
           <TextInput
             placeholder="Password"
             secureTextEntry
-            className="ml-3 flex-1 text-base"
+            style={styles.input}
+            value={password}
+            onChangeText={setPassword}
           />
         </View>
 
-        {/* Register Button */}
-        <TouchableOpacity className="bg-green-700 py-3 rounded-lg mt-7">
-          <Text className="text-white text-center font-semibold text-lg">
-            Register Driver
+        {/* Button */}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleRegister}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? "Registering..." : "Register Driver"}
           </Text>
         </TouchableOpacity>
 
-        {/* Login Link */}
-        <TouchableOpacity
-          onPress={() => router.push("/user-login")}
-          className="mt-5 mb-10"
-        >
-          <Text className="text-center text-green-700">
+        <TouchableOpacity onPress={() => router.push("/user-login")}>
+          <Text style={styles.loginText}>
             Already registered? Login
           </Text>
         </TouchableOpacity>
@@ -127,3 +163,61 @@ export default function DriverRegister() {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#fff" },
+  inner: { padding: 20 },
+
+  center: { alignItems: "center" },
+  imageBox: {
+    width: 110,
+    height: 110,
+    borderRadius: 60,
+    borderWidth: 2,
+    borderColor: "#15803d",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  image: { width: "100%", height: "100%", borderRadius: 60 },
+  uploadText: { marginTop: 6, color: "#15803d" },
+
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#15803d",
+    marginTop: 20,
+  },
+
+  inputBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#86efac",
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 15,
+  },
+
+  input: { marginLeft: 10, flex: 1 },
+
+  button: {
+    backgroundColor: "#15803d",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 25,
+  },
+
+  buttonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+
+  loginText: {
+    textAlign: "center",
+    marginTop: 15,
+    color: "#15803d",
+  },
+});
