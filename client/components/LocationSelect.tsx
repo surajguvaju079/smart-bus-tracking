@@ -1,6 +1,6 @@
 import { kathmanduLocations } from "@/constants/KathmanduLocations";
 import { LocationOption } from "@/types/location/location";
-import { View, Text, TouchableOpacity, FlatList } from "react-native";
+import { View, Text, TouchableOpacity, FlatList, StyleSheet } from "react-native";
 
 interface Props {
   label: string;
@@ -9,25 +9,43 @@ interface Props {
 
 export default function LocationSelect({ label, onSelect }: Props) {
   return (
-    <View>
-      <Text style={{ fontWeight: "bold", marginBottom: 5 }}>{label}</Text>
+    <View style={styles.container}>
+      <Text style={styles.label}>{label}</Text>
 
       <FlatList
         data={kathmanduLocations}
         keyExtractor={(item) => item.name}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={{
-              padding: 10,
-              borderBottomWidth: 1,
-              borderColor: "#ddd",
-            }}
+            style={styles.item}
             onPress={() => onSelect(item)}
           >
-            <Text>{item.name}</Text>
+            <Text style={styles.itemText}>{item.name}</Text>
           </TouchableOpacity>
         )}
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: 12,
+  },
+  label: {
+    fontWeight: "bold",
+    marginBottom: 5,
+    fontSize: 14,
+    color: "#15803d", // green text, can adjust
+  },
+  item: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "#f3f4f6",
+  },
+  itemText: {
+    fontSize: 14,
+    color: "#333",
+  },
+});

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Dimensions } from "react-native";
+import { View, Text, Dimensions, StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { MaterialIcons } from "@expo/vector-icons";
 
@@ -17,14 +17,14 @@ interface MapCardProps {
 
 export default function MapCard({ buses }: MapCardProps) {
   const screenWidth = Dimensions.get("window").width;
-  const mapHeight = 300; // adjust height as needed
+  const mapHeight = 300;
 
   return (
-    <View className="mt-6 rounded-xl overflow-hidden">
-      <Text className="text-green-700 font-bold text-xl mb-2">Live Bus Map</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Live Bus Map</Text>
 
       <MapView
-        style={{ width: screenWidth - 40, height: mapHeight }}
+        style={[styles.map, { width: screenWidth - 40, height: mapHeight }]}
         initialRegion={{
           latitude: buses.length ? buses[0].lat : 27.7,
           longitude: buses.length ? buses[0].lng : 85.3,
@@ -46,3 +46,21 @@ export default function MapCard({ buses }: MapCardProps) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    marginTop: 16,
+    borderRadius: 16,
+    overflow: "hidden",
+    paddingHorizontal: 20,
+  },
+  title: {
+    color: "#166534",
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  map: {
+    borderRadius: 16,
+  },
+});
