@@ -6,17 +6,21 @@ import { io } from "socket.io-client";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState, useRef } from "react";
 import { SOCKET_URL } from "@/constants/SocketUrl";
+import { Route } from "@/api/route";
 
+const API_URL = "YOUR_API_URL_HERE"; // 🔥 replace this
 const socket = io(SOCKET_URL);
 
 export default function LiveBusMap() {
   const { tripId } = useLocalSearchParams() as any;
+
   const isAnimating = useRef(false);
+  const mapRef = useRef<MapView | null>(null);
+
   const [locations, setLocations] = useState<any[]>([]);
+  const [routeStops, setRouteStops] = useState<any[]>([]);
   const [rotation, setRotation] = useState(0);
   const [speed, setSpeed] = useState(0);
-
-  const mapRef = useRef<MapView | null>(null);
 
   // Animated coordinate
   const animatedCoordinate = useRef(
@@ -28,7 +32,9 @@ export default function LiveBusMap() {
     }),
   ).current;
 
-  // Calculate distance (meters)
+  // =========================
+  // Distance (Haversine)
+  // =========================
   const distance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371000;
     const toRad = (v: number) => (v * Math.PI) / 180;
@@ -46,13 +52,18 @@ export default function LiveBusMap() {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
 
-  // Calculate rotation
+  // =========================
+  // Rotation
+  // =========================
   const getRotation = (start: any, end: any) => {
     const latDiff = end.latitude - start.latitude;
     const lngDiff = end.longitude - start.longitude;
     return (Math.atan2(lngDiff, latDiff) * 180) / Math.PI;
   };
 
+  // =========================
+  // Interpolation
+  // =========================
   const interpolate = (start: any, end: any, steps = 20) => {
     const points = [];
 
@@ -71,7 +82,8 @@ export default function LiveBusMap() {
   const animateSmoothly = async (start: any, end: any) => {
     if (isAnimating.current) return;
     isAnimating.current = true;
-    const points = interpolate(start, end, 20); // 20 steps
+
+    const points = interpolate(start, end, 20);
 
     for (let i = 0; i < points.length; i++) {
       await new Promise((resolve) => {
@@ -79,14 +91,57 @@ export default function LiveBusMap() {
           .timing({
             latitude: points[i].latitude,
             longitude: points[i].longitude,
-            duration: 100, // smoothness speed
+            duration: 100,
             useNativeDriver: false,
           })
           .start(() => resolve(true));
       });
     }
+
+    isAnimating.current = false;
   };
 
+  // =========================
+  // Fetch Route + Stops
+  // =========================
+  useEffect(() => {
+    const fetchRoute = async () => {
+      try {
+        const res = await Route.show(Number(tripId));
+
+        const stops = res?.data?.responseObject?.stops ?? [];
+
+        setRouteStops(stops);
+
+        // Fit map to route
+        if (stops.length > 0 && mapRef.current) {
+          mapRef.current.fitToCoordinates(
+            stops.map((s: any) => ({
+              latitude: s.latitude,
+              longitude: s.longitude,
+            })),
+            {
+              edgePadding: {
+                top: 100,
+                right: 50,
+                bottom: 100,
+                left: 50,
+              },
+              animated: true,
+            },
+          );
+        }
+      } catch (error) {
+        console.log("Error fetching route:", error);
+      }
+    };
+
+    if (tripId) fetchRoute();
+  }, [tripId]);
+
+  // =========================
+  // Socket Tracking
+  // =========================
   useEffect(() => {
     if (!tripId) return;
 
@@ -102,13 +157,10 @@ export default function LiveBusMap() {
             data.longitude,
           );
 
-          // Ignore small GPS noise (<5m)
           if (d < 5) return prev;
 
-          // Animate movement
           animateSmoothly(last, data);
 
-          // Rotation (use heading if exists)
           const angle = data.heading ?? getRotation(last, data);
 
           setRotation(angle);
@@ -120,11 +172,9 @@ export default function LiveBusMap() {
           });
         }
 
-        // Limit to last 50 points
         return [...prev.slice(-50), data];
       });
 
-      // Camera follow
       mapRef.current?.animateCamera(
         {
           center: {
@@ -151,6 +201,39 @@ export default function LiveBusMap() {
     };
   }, [tripId]);
 
+  // =========================
+  // Nearest Stop
+  // =========================
+  const latest = locations[locations.length - 1];
+
+  const getNearestStop = () => {
+    if (!latest || routeStops.length === 0) return null;
+
+    let minDist = Infinity;
+    let nearest = null;
+
+    routeStops.forEach((stop) => {
+      const d = distance(
+        latest.latitude,
+        latest.longitude,
+        stop.latitude,
+        stop.longitude,
+      );
+
+      if (d < minDist) {
+        minDist = d;
+        nearest = stop;
+      }
+    });
+
+    return nearest;
+  };
+
+  const nearestStop = getNearestStop();
+
+  // =========================
+  // Loading
+  // =========================
   if (locations.length === 0) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -159,8 +242,9 @@ export default function LiveBusMap() {
     );
   }
 
-  const latest = locations[locations.length - 1];
-
+  // =========================
+  // UI
+  // =========================
   return (
     <View style={{ flex: 1 }}>
       <AppHeader />
@@ -175,7 +259,19 @@ export default function LiveBusMap() {
           longitudeDelta: 0.01,
         }}
       >
-        {/* Path */}
+        {/* Planned Route (Grey) */}
+        {routeStops.length > 0 && (
+          <Polyline
+            coordinates={routeStops.map((stop) => ({
+              latitude: stop.latitude,
+              longitude: stop.longitude,
+            }))}
+            strokeWidth={3}
+            strokeColor="#9CA3AF"
+          />
+        )}
+
+        {/* Live Path (Green) */}
         <Polyline
           coordinates={locations.map((loc) => ({
             latitude: loc.latitude,
@@ -185,16 +281,34 @@ export default function LiveBusMap() {
           strokeColor="#15803d"
         />
 
-        {/* Start Marker */}
-        {locations.length > 0 && (
+        {/* Stops */}
+        {routeStops.map((stop, index) => (
+          <Marker
+            key={stop.id}
+            coordinate={{
+              latitude: stop.latitude,
+              longitude: stop.longitude,
+            }}
+            title={stop.name}
+          >
+            <MaterialIcons
+              name={index === routeStops.length - 1 ? "flag" : "trip-origin"}
+              size={20}
+              color={index === routeStops.length - 1 ? "red" : "#15803d"}
+            />
+          </Marker>
+        ))}
+
+        {/* Nearest Stop */}
+        {nearestStop && (
           <Marker
             coordinate={{
-              latitude: locations[0].latitude,
-              longitude: locations[0].longitude,
+              latitude: nearestStop.latitude,
+              longitude: nearestStop.longitude,
             }}
-            title="Start"
-            pinColor="blue"
-          />
+          >
+            <MaterialIcons name="place" size={30} color="orange" />
+          </Marker>
         )}
 
         {/* Animated Bus */}
@@ -210,7 +324,7 @@ export default function LiveBusMap() {
         </Marker.Animated>
       </MapView>
 
-      {/* Speed UI */}
+      {/* Speed */}
       <Text
         style={{
           position: "absolute",
@@ -222,6 +336,20 @@ export default function LiveBusMap() {
         }}
       >
         Speed: {(speed * 3.6).toFixed(1)} km/h
+      </Text>
+
+      {/* Next Stop */}
+      <Text
+        style={{
+          position: "absolute",
+          top: 140,
+          left: 20,
+          backgroundColor: "white",
+          padding: 8,
+          borderRadius: 8,
+        }}
+      >
+        Next Stop: {nearestStop?.name ?? "—"}
       </Text>
     </View>
   );

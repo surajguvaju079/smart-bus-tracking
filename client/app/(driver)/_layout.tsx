@@ -45,9 +45,9 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="create-trip"
+        name="route"
         options={{
-          title: "Create Trip",
+          title: "Routes",
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="alt-route" size={size} color={color} />
           ),

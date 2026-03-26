@@ -245,7 +245,7 @@ const DriverTrackingScreen = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <AppHeader />
+      <AppHeader text="Tracking" />
 
       {latest ? (
         <MapView

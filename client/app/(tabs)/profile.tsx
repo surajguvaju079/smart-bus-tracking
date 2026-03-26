@@ -27,9 +27,7 @@ const Profile = () => {
       {/* Profile Header */}
       <View className="items-center mt-6">
         <Image
-          source={{
-            uri: user?.profileImage || "https://via.placeholder.com/150",
-          }}
+          source={require("../../assets/images/user.jpg")}
           className="w-28 h-28 rounded-full border-4 border-green-600"
         />
 

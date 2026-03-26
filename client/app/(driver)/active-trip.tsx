@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 import AppHeader from "@/components/AppHeader";
 import { trip } from "@/api/trip";
 import { useUserStore } from "@/store/userStore";
+import { MaterialIcons } from "@expo/vector-icons";
 
 export default function ActiveTrip() {
   const user = useUserStore((state) => state.user);
@@ -43,12 +44,12 @@ export default function ActiveTrip() {
   }, [router, user?.driver_id]);
 
   const goToTracking = (tripId: number) => {
-    router.push(`/(driver)/${tripId}`);
+    router.push(`/(tracking)/driver/${tripId}`);
   };
 
   const getStatusColor = (status: string) => {
     if (status === "PLANNED") return "#2563eb";
-    if (status === "COMPLETED") return "#16a34a";
+    if (status === "COMPLETED") return "#ee2345";
     return "#6b7280";
   };
 
@@ -114,26 +115,28 @@ export default function ActiveTrip() {
               {item.status}
             </Text>
           </View>
-          <Pressable
-            style={{
-              marginTop: 10,
-              alignSelf: "flex-end",
-              paddingHorizontal: 10,
-              paddingVertical: 4,
-              borderRadius: 8,
-              backgroundColor: "#145689",
-            }}
-            onPress={() => router.replace("/create-route-screen")}
-          >
-            <Text
+          {item.status !== "COMPLETED" && (
+            <Pressable
               style={{
-                color: "#fff",
-                fontWeight: 600,
+                marginTop: 10,
+                alignSelf: "flex-end",
+                paddingHorizontal: 10,
+                paddingVertical: 4,
+                borderRadius: 8,
+                backgroundColor: "#145689",
               }}
+              onPress={() => router.replace("/create-route-screen")}
             >
-              + Add Routes
-            </Text>
-          </Pressable>
+              <Text
+                style={{
+                  color: "#fff",
+                  fontWeight: 600,
+                }}
+              >
+                + Add Routes
+              </Text>
+            </Pressable>
+          )}
         </View>
 
         {/* Start Tracking */}
@@ -165,7 +168,7 @@ export default function ActiveTrip() {
   if (loading) {
     return (
       <View style={{ flex: 1, backgroundColor: "white" }}>
-        <AppHeader />
+        <AppHeader text="Trips" />
         <View
           style={{
             flex: 1,
@@ -198,7 +201,42 @@ export default function ActiveTrip() {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#f3f4f6" }}>
-      <AppHeader />
+      <AppHeader text="Trips" />
+      <View
+        style={{
+          marginHorizontal: 20,
+          paddingVertical: 20,
+          display: "flex",
+          marginTop: 20,
+          justifyContent: "flex-end",
+          backgroundColor: "#555555",
+          borderRadius: 20,
+          alignContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Pressable
+          onPress={() => router.push("/create-trip")}
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            alignContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <MaterialIcons name="add" size={18} color={"#ffffff"} />
+          <Text
+            style={{
+              color: "#ffffff",
+              fontWeight: "600",
+              fontSize: 16,
+            }}
+          >
+            Create Trips
+          </Text>
+        </Pressable>
+      </View>
 
       <FlatList
         data={trips}

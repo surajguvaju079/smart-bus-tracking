@@ -15,7 +15,7 @@ import AppHeader from "@/components/AppHeader";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 
-const RouteRecommend = () => {
+const Routes = () => {
   const [loading, setLoading] = useState(false);
   const [routes, setRoutes] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -143,7 +143,42 @@ const RouteRecommend = () => {
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <AppHeader text="Routes" />
-
+      <View
+        style={{
+          marginHorizontal: 20,
+          paddingVertical: 20,
+          display: "flex",
+          marginTop: 15,
+          justifyContent: "flex-end",
+          backgroundColor: "#555555",
+          borderRadius: 20,
+          alignContent: "center",
+          alignItems: "center",
+          marginBottom: 10,
+        }}
+      >
+        <Pressable
+          onPress={() => router.push("/create-route-screen")}
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            alignContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <MaterialIcons name="add" size={18} color={"#ffffff"} />
+          <Text
+            style={{
+              color: "#ffffff",
+              fontWeight: "600",
+              fontSize: 16,
+            }}
+          >
+            Create Routes
+          </Text>
+        </Pressable>
+      </View>
       {loading ? (
         <View
           style={{
@@ -179,4 +214,4 @@ const RouteRecommend = () => {
   );
 };
 
-export default RouteRecommend;
+export default Routes;

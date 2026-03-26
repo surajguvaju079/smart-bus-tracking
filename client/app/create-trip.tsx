@@ -115,7 +115,7 @@ export default function CreateTripScreen() {
       });
       Alert.alert("Trip Created", "Your trip has been created successfully!");
 
-      router.replace("/driver-dashboard");
+      router.replace("/active-trip");
     } catch (error) {
       console.log("Error creating trip:", error);
     } finally {
@@ -136,7 +136,7 @@ export default function CreateTripScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0a0f0a" />
+      <StatusBar barStyle="light-content" backgroundColor="#0c0f0c" />
       <AppHeader />
       <View style={styles.driverCard}>
         <Text style={styles.driverName}>{user?.name}</Text>
@@ -154,7 +154,6 @@ export default function CreateTripScreen() {
           <View style={styles.badge}>
             <Text style={styles.badgeText}>NEW TRIP</Text>
           </View>
-          <Text style={styles.title}>Create Trip</Text>
           <Text style={styles.subtitle}>
             Fill in the details to schedule your route
           </Text>
@@ -365,18 +364,16 @@ const styles = StyleSheet.create({
   driverCard: {
     marginHorizontal: 20,
     marginTop: 16,
-    backgroundColor: "#111811",
+    backgroundColor: "#ececec",
     borderRadius: 12,
     padding: 16,
-    borderWidth: 1,
-    borderColor: "#1e2e1e",
     marginBottom: 20,
   },
 
   driverName: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#e8f5e8",
+    color: "#22c66e",
   },
 
   driverVehicle: {
