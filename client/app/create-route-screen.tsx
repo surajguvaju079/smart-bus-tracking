@@ -13,6 +13,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import AppHeader from "@/components/AppHeader";
 import SearchableLocationPicker from "@/components/SearchLocationPicker";
 import { Route } from "@/api/route";
+import { SafeAreaView } from "react-native-safe-area-context";
 const API_URL = "http://YOUR_API_URL/routes/full";
 
 const CreateRouteScreen = () => {
@@ -81,6 +82,7 @@ const CreateRouteScreen = () => {
 
       const res = await Route.create({
         name: routeName,
+
         stops: formattedStops,
       });
       if (!res?.data?.responseObject) {
@@ -162,11 +164,19 @@ const CreateRouteScreen = () => {
   );
 
   return (
-    <View style={{ flex: 1, padding: 16 }}>
-      <AppHeader />
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#f3f4f6" }}>
+      <AppHeader text="Create Route With Stops" />
 
-      <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>
-        Create Route
+      <Text
+        style={{
+          marginTop: 10,
+          fontSize: 20,
+          marginHorizontal: 8,
+          fontWeight: "bold",
+          marginBottom: 4,
+        }}
+      >
+        Route
       </Text>
 
       {/* Route Name */}
@@ -185,10 +195,16 @@ const CreateRouteScreen = () => {
       />
 
       {/* Add Stop */}
-      <Button title="Add Stop" onPress={addStop} />
-
+      <View
+        style={{
+          marginHorizontal: 10,
+          borderRadius: 10,
+        }}
+      >
+        <Button title="Add Stop" onPress={addStop} />
+      </View>
       {/* Submit */}
-      <View style={{ marginTop: 20 }}>
+      <View style={{ marginTop: 20, marginHorizontal: 10 }}>
         <Button
           title={loading ? "Creating..." : "Create Route"}
           onPress={handleSubmit}
@@ -196,7 +212,7 @@ const CreateRouteScreen = () => {
           color="green"
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -207,6 +223,7 @@ const styles = {
     padding: 10,
     marginVertical: 8,
     borderRadius: 8,
+    marginHorizontal: 8,
     backgroundColor: "white",
   },
 };

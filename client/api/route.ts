@@ -9,4 +9,11 @@ export const Route = {
   create: async (data: any, trip_id?: number) => {
     return await axios.post(`${BASE_URL}/routes/full`, data);
   },
+
+  showAll: async () => {
+    return await axios.get(`${BASE_URL}/routes`);
+  },
+  showById: async (id: number) => {
+    return await axios.get(`${BASE_URL}/routes/one/${id}`);
+  },
 };

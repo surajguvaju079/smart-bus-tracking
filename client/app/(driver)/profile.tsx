@@ -1,5 +1,6 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import React from "react";
+import { Image } from "expo-image";
 import { ScrollView } from "react-native-gesture-handler";
 import { MaterialIcons } from "@expo/vector-icons";
 import AppHeader from "@/components/AppHeader";
@@ -27,10 +28,14 @@ const Profile = () => {
       {/* Profile Header */}
       <View className="items-center mt-6">
         <Image
-          source={{
-            uri: user?.profileImage || "https://via.placeholder.com/150",
-          }}
+          source={require("../../assets/images/driver.jpg")}
           className="w-28 h-28 rounded-full border-4 border-green-600"
+          style={{
+            width: 100,
+            height: 100,
+            borderWidth: 2,
+            borderRadius: 50,
+          }}
         />
 
         <Text className="text-2xl font-bold text-gray-800 mt-4">
