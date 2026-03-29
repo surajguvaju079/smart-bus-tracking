@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import { useState, useEffect } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -31,10 +32,8 @@ export default function LiveBusTracking() {
       if (res.status === 200) {
         const trips = res.data.responseObject.trips;
 
-        console.log("Fetched trips:", trips);
-
         const updatedBuses = trips
-          .filter((trip: any) => trip.status !== "COMPLETED") // show only active
+          .filter((trip: any) => trip.status !== "COMPLETED")
           .map((trip: any) => ({
             id: trip.id,
             busNo: trip.vehicleNumber,
@@ -54,58 +53,58 @@ export default function LiveBusTracking() {
     }
   };
 
-  if (loading)
+  if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size={"large"} color={"green"} />
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="green" />
       </View>
     );
+  }
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView style={styles.container}>
       <AppHeader />
 
-      <View className="px-5 mt-6">
-        <Text className="text-2xl font-bold text-green-700 text-center">
-          Live Bus Dashboard
-        </Text>
+      <View style={styles.wrapper}>
+        <Text style={styles.title}>Live Bus Dashboard</Text>
 
         {buses.length === 0 && (
-          <View className="mt-10 items-center">
-            <Text className="text-gray-500 text-base">
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyText}>
               No active buses available
             </Text>
           </View>
         )}
 
         {buses.map((bus) => (
-          <View
-            key={bus.id}
-            className="flex-row justify-between items-center bg-green-50 border border-green-200 rounded-xl p-4 mt-4"
-          >
-            <View className="flex-row items-center">
-              <MaterialIcons name="directions-bus" size={28} color="#15803d" />
+          <View key={bus.id} style={styles.card}>
+            <View style={styles.left}>
+              <MaterialIcons
+                name="directions-bus"
+                size={28}
+                color="#15803d"
+              />
 
-              <View className="ml-3">
-                <Text className="text-green-800 font-semibold text-lg">
-                  Bus {bus.busNo}
-                </Text>
-
-                <Text className="text-gray-700 text-sm">{bus.route}</Text>
+              <View style={styles.busInfo}>
+                <Text style={styles.busTitle}>Bus {bus.busNo}</Text>
+                <Text style={styles.route}>{bus.route}</Text>
               </View>
             </View>
 
-            <View className="items-end">
+            <View style={styles.right}>
               <Text
-                className={`text-xs font-semibold ${
-                  bus.status === "Live" ? "text-green-700" : "text-yellow-600"
-                }`}
+                style={[
+                  styles.status,
+                  bus.status === "Live"
+                    ? styles.live
+                    : styles.scheduled,
+                ]}
               >
                 {bus.status}
               </Text>
 
               <TouchableOpacity
-                className="bg-green-700 px-3 py-1 mt-2 rounded-lg"
+                style={styles.trackBtn}
                 onPress={() =>
                   router.push({
                     pathname: "/live-bus-map",
@@ -113,7 +112,7 @@ export default function LiveBusTracking() {
                   })
                 }
               >
-                <Text className="text-white font-semibold text-sm">Track</Text>
+                <Text style={styles.trackText}>Track</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -122,3 +121,101 @@ export default function LiveBusTracking() {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+
+  loader: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  wrapper: {
+    paddingHorizontal: 20,
+    marginTop: 24,
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#15803d",
+    textAlign: "center",
+  },
+
+  emptyBox: {
+    marginTop: 40,
+    alignItems: "center",
+  },
+
+  emptyText: {
+    color: "#6b7280",
+    fontSize: 16,
+  },
+
+  card: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#f0fdf4",
+    borderWidth: 1,
+    borderColor: "#bbf7d0",
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 16,
+  },
+
+  left: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  busInfo: {
+    marginLeft: 12,
+  },
+
+  busTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#166534",
+  },
+
+  route: {
+    fontSize: 12,
+    color: "#374151",
+  },
+
+  right: {
+    alignItems: "flex-end",
+  },
+
+  status: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+
+  live: {
+    color: "#15803d",
+  },
+
+  scheduled: {
+    color: "#ca8a04",
+  },
+
+  trackBtn: {
+    backgroundColor: "#15803d",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginTop: 8,
+    borderRadius: 8,
+  },
+
+  trackText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+});

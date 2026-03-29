@@ -1,10 +1,29 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 
 export default function Header() {
   return (
-    <View className="bg-green-700 py-4 px-5 shadow-md">
-      <Text className="text-white text-2xl font-bold">Admin Dashboard</Text>
+    <View style={styles.header}>
+      <Text style={styles.title}>Admin Dashboard</Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    backgroundColor: "#15803d",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 4, // Android shadow
+  },
+
+  title: {
+    color: "#fff",
+    fontSize: 22,
+    fontWeight: "bold",
+  },
+});

@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
 type Driver = {
@@ -13,8 +20,22 @@ type Driver = {
 
 export default function DriverDashboard() {
   const [drivers, setDrivers] = useState<Driver[]>([
-    { id: 1, name: "Ram", busNo: "27", vehicleNo: "KA-1234", route: "Ratnapark → Kalanki", mobile: "9800000001" },
-    { id: 2, name: "Shyam", busNo: "12", vehicleNo: "KA-5678", route: "Ratnapark → Balkhu", mobile: "9800000002" },
+    {
+      id: 1,
+      name: "Ram",
+      busNo: "27",
+      vehicleNo: "KA-1234",
+      route: "Ratnapark → Kalanki",
+      mobile: "9800000001",
+    },
+    {
+      id: 2,
+      name: "Shyam",
+      busNo: "12",
+      vehicleNo: "KA-5678",
+      route: "Ratnapark → Balkhu",
+      mobile: "9800000002",
+    },
   ]);
 
   const [search, setSearch] = useState("");
@@ -29,6 +50,7 @@ export default function DriverDashboard() {
       alert("Please fill all fields");
       return;
     }
+
     const newDriver: Driver = {
       id: drivers.length + 1,
       name,
@@ -37,8 +59,13 @@ export default function DriverDashboard() {
       route,
       mobile,
     };
+
     setDrivers((prev) => [...prev, newDriver]);
-    setName(""); setBusNo(""); setVehicleNo(""); setRoute(""); setMobile("");
+    setName("");
+    setBusNo("");
+    setVehicleNo("");
+    setRoute("");
+    setMobile("");
   };
 
   const filteredDrivers = drivers.filter(
@@ -49,47 +76,91 @@ export default function DriverDashboard() {
   );
 
   return (
-    <ScrollView className="flex-1 bg-green-50 px-5 py-4">
-      <Text className="text-2xl font-bold text-green-700 mb-4 text-center">Driver Dashboard</Text>
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Driver Dashboard</Text>
 
       {/* Search */}
-      <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-2 mb-4">
+      <View style={styles.searchBox}>
         <MaterialIcons name="search" size={24} color="#166534" />
+
         <TextInput
           placeholder="Search driver by name, bus no or route"
-          className="ml-3 flex-1 text-gray-700"
+          placeholderTextColor="#6b7280"
+          style={styles.searchInput}
           value={search}
           onChangeText={setSearch}
         />
       </View>
 
       {/* Add Driver */}
-      <View className="bg-green-100 p-4 rounded-xl mb-6">
-        <Text className="text-lg font-semibold text-green-700 mb-3">Add New Driver</Text>
-        <TextInput placeholder="Driver Name" className="border border-green-300 rounded-lg px-3 py-2 mb-2" value={name} onChangeText={setName} />
-        <TextInput placeholder="Bus No" className="border border-green-300 rounded-lg px-3 py-2 mb-2" value={busNo} onChangeText={setBusNo} />
-        <TextInput placeholder="Vehicle No" className="border border-green-300 rounded-lg px-3 py-2 mb-2" value={vehicleNo} onChangeText={setVehicleNo} />
-        <TextInput placeholder="Route" className="border border-green-300 rounded-lg px-3 py-2 mb-2" value={route} onChangeText={setRoute} />
-        <TextInput placeholder="Mobile Number" className="border border-green-300 rounded-lg px-3 py-2 mb-2" value={mobile} onChangeText={setMobile} />
-        <TouchableOpacity className="bg-green-700 py-3 rounded-lg mt-2" onPress={addDriver}>
-          <Text className="text-white text-center font-semibold">Add Driver</Text>
+      <View style={styles.formBox}>
+        <Text style={styles.sectionTitle}>Add New Driver</Text>
+
+        <TextInput
+          placeholder="Driver Name"
+          placeholderTextColor="#6b7280"
+          style={styles.input}
+          value={name}
+          onChangeText={setName}
+        />
+
+        <TextInput
+          placeholder="Bus No"
+          placeholderTextColor="#6b7280"
+          style={styles.input}
+          value={busNo}
+          onChangeText={setBusNo}
+        />
+
+        <TextInput
+          placeholder="Vehicle No"
+          placeholderTextColor="#6b7280"
+          style={styles.input}
+          value={vehicleNo}
+          onChangeText={setVehicleNo}
+        />
+
+        <TextInput
+          placeholder="Route"
+          placeholderTextColor="#6b7280"
+          style={styles.input}
+          value={route}
+          onChangeText={setRoute}
+        />
+
+        <TextInput
+          placeholder="Mobile Number"
+          placeholderTextColor="#6b7280"
+          style={styles.input}
+          value={mobile}
+          onChangeText={setMobile}
+        />
+
+        <TouchableOpacity style={styles.button} onPress={addDriver}>
+          <Text style={styles.buttonText}>Add Driver</Text>
         </TouchableOpacity>
       </View>
 
       {/* Driver List */}
-      <View className="bg-white rounded-xl p-4 shadow">
-        <Text className="text-lg font-semibold text-green-700 mb-3">Driver List ({filteredDrivers.length})</Text>
+      <View style={styles.listBox}>
+        <Text style={styles.listTitle}>
+          Driver List ({filteredDrivers.length})
+        </Text>
+
         {filteredDrivers.length === 0 ? (
-          <Text className="text-gray-600 text-center py-4">No drivers found</Text>
+          <Text style={styles.emptyText}>No drivers found</Text>
         ) : (
           filteredDrivers.map((d) => (
-            <View key={d.id} className="flex-row justify-between items-center p-3 border-b border-green-200">
-              <View>
-                <Text className="text-green-700 font-semibold">{d.name}</Text>
-                <Text className="text-gray-700 text-sm">{d.busNo} | {d.vehicleNo}</Text>
-                <Text className="text-gray-700 text-sm">{d.route}</Text>
+            <View key={d.id} style={styles.row}>
+              <View style={styles.left}>
+                <Text style={styles.name}>{d.name}</Text>
+                <Text style={styles.subText}>
+                  {d.busNo} | {d.vehicleNo}
+                </Text>
+                <Text style={styles.subText}>{d.route}</Text>
               </View>
-              <Text className="text-gray-700 text-sm">{d.mobile}</Text>
+
+              <Text style={styles.mobile}>{d.mobile}</Text>
             </View>
           ))
         )}
@@ -97,3 +168,122 @@ export default function DriverDashboard() {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f0fdf4",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#15803d",
+    textAlign: "center",
+    marginBottom: 16,
+  },
+
+  searchBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#86efac",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 16,
+    backgroundColor: "#fff",
+  },
+
+  searchInput: {
+    marginLeft: 10,
+    flex: 1,
+    color: "#111827",
+  },
+
+  formBox: {
+    backgroundColor: "#dcfce7",
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#15803d",
+    marginBottom: 12,
+  },
+
+  input: {
+    borderWidth: 1,
+    borderColor: "#86efac",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginBottom: 10,
+    backgroundColor: "#fff",
+  },
+
+  button: {
+    backgroundColor: "#15803d",
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 4,
+  },
+
+  buttonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "600",
+  },
+
+  listBox: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+  },
+
+  listTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#15803d",
+    marginBottom: 12,
+  },
+
+  emptyText: {
+    textAlign: "center",
+    color: "#6b7280",
+    paddingVertical: 20,
+  },
+
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#bbf7d0",
+    paddingVertical: 10,
+  },
+
+  left: {
+    flex: 1,
+  },
+
+  name: {
+    color: "#15803d",
+    fontWeight: "600",
+  },
+
+  subText: {
+    color: "#374151",
+    fontSize: 12,
+  },
+
+  mobile: {
+    color: "#374151",
+    fontSize: 12,
+  },
+});

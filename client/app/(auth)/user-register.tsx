@@ -1,3 +1,4 @@
+import React from "react";
 import {
   View,
   Text,
@@ -5,6 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -15,6 +17,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema } from "../../schema/userSchema";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppHeader from "@/components/AppHeader";
+
+import { BASE_URL } from "@/constants/BaseUrl";
 
 type RegisterForm = {
   name: string;
@@ -36,6 +40,8 @@ export default function UserRegister() {
 
   const onSubmit = async (data: RegisterForm) => {
     try {
+      console.log("Base URL:", BASE_URL);
+
       const res = await User.register({
         name: data.name.trim(),
         email: data.email.trim().toLowerCase(),
@@ -47,8 +53,9 @@ export default function UserRegister() {
         router.replace("/user-login");
       }
     } catch (error: any) {
-      console.log("Register error:", error.response?.data);
-      if (error.response?.status === 409) {
+      console.log("Register error:", error?.response?.data);
+
+      if (error?.response?.status === 409) {
         Alert.alert("Register Failed", "Email already exists");
       } else {
         Alert.alert("Error", "Something went wrong");
@@ -57,24 +64,23 @@ export default function UserRegister() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 bg-white">
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
         <AppHeader />
-        <View className="px-6 mt-12">
-          <Text className="text-2xl font-bold text-green-700 text-center">
-            User Registration
-          </Text>
 
-          {/* Name */}
+        <View style={styles.content}>
+          <Text style={styles.title}>User Registration</Text>
+
+          {/* NAME */}
           <Controller
             control={control}
             name="name"
             render={({ field: { value, onChange } }) => (
-              <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-8">
+              <View style={styles.inputBox}>
                 <MaterialIcons name="person" size={22} color="#15803d" />
                 <TextInput
                   placeholder="Full Name"
-                  className="ml-3 flex-1"
+                  style={styles.input}
                   value={value}
                   onChangeText={onChange}
                 />
@@ -82,21 +88,21 @@ export default function UserRegister() {
             )}
           />
           {errors.name && (
-            <Text className="text-red-500">{errors.name.message}</Text>
+            <Text style={styles.errorText}>{errors.name.message}</Text>
           )}
 
-          {/* Email */}
+          {/* EMAIL */}
           <Controller
             control={control}
             name="email"
             render={({ field: { value, onChange } }) => (
-              <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-4">
+              <View style={styles.inputBox}>
                 <MaterialIcons name="email" size={22} color="#15803d" />
                 <TextInput
                   placeholder="Email"
                   keyboardType="email-address"
                   autoCapitalize="none"
-                  className="ml-3 flex-1"
+                  style={styles.input}
                   value={value}
                   onChangeText={onChange}
                 />
@@ -104,20 +110,20 @@ export default function UserRegister() {
             )}
           />
           {errors.email && (
-            <Text className="text-red-500">{errors.email.message}</Text>
+            <Text style={styles.errorText}>{errors.email.message}</Text>
           )}
 
-          {/* Password */}
+          {/* PASSWORD */}
           <Controller
             control={control}
             name="password"
             render={({ field: { value, onChange } }) => (
-              <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-4">
+              <View style={styles.inputBox}>
                 <MaterialIcons name="lock" size={22} color="#15803d" />
                 <TextInput
                   placeholder="Password (min 6 chars)"
                   secureTextEntry
-                  className="ml-3 flex-1"
+                  style={styles.input}
                   value={value}
                   onChangeText={onChange}
                 />
@@ -125,57 +131,122 @@ export default function UserRegister() {
             )}
           />
           {errors.password && (
-            <Text className="text-red-500">{errors.password.message}</Text>
+            <Text style={styles.errorText}>{errors.password.message}</Text>
           )}
 
+          {/* REGISTER BUTTON */}
           <TouchableOpacity
             onPress={handleSubmit(onSubmit)}
             disabled={isSubmitting}
-            className="bg-green-700 py-3 rounded-lg mt-6"
+            style={styles.button}
           >
             {isSubmitting ? (
-              <ActivityIndicator color="#ffffff" />
+              <ActivityIndicator color="#fff" />
             ) : (
-              <Text className="text-white text-center font-semibold text-lg">
-                Register
-              </Text>
+              <Text style={styles.buttonText}>Register</Text>
             )}
           </TouchableOpacity>
 
+          {/* LOGIN LINK */}
           <TouchableOpacity
             onPress={() => router.push("/user-login")}
-            className="mt-5"
+            style={styles.linkBox}
           >
-            <View className="flex-row items-center justify-center">
-              <Text className="text-center text-green-700 ">
-                Already have an account?{" "}
-              </Text>
-              <Text
-                style={{ textDecorationLine: "underline" }}
-                className="text-center text-green-700 font-semibold"
-              >
-                Login
-              </Text>
-            </View>
+            <Text style={styles.linkText}>
+              Already have an account?{" "}
+              <Text style={styles.linkStrong}>Login</Text>
+            </Text>
           </TouchableOpacity>
+
+          {/* DRIVER LINK */}
           <TouchableOpacity
             onPress={() => router.push("/driver-register")}
-            className="mt-5"
+            style={styles.linkBox}
           >
-            <View className="flex-row items-center justify-center">
-              <Text className="text-center text-green-700 ">
-                Join as a Driver?{" "}
-              </Text>
-              <Text
-                style={{ textDecorationLine: "underline" }}
-                className="text-center text-green-700 font-semibold"
-              >
-                Register here
-              </Text>
-            </View>
+            <Text style={styles.linkText}>
+              Join as a Driver?{" "}
+              <Text style={styles.linkStrong}>Register here</Text>
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
   );
 }
+
+/* =======================
+   STYLE SHEET
+======================= */
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+
+  content: {
+    paddingHorizontal: 24,
+    marginTop: 48,
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#15803d",
+    textAlign: "center",
+  },
+
+  inputBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#86efac",
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginTop: 16,
+  },
+
+  input: {
+    marginLeft: 12,
+    flex: 1,
+    fontSize: 16,
+  },
+
+  button: {
+    backgroundColor: "#15803d",
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 24,
+  },
+
+  buttonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+
+  linkBox: {
+    marginTop: 20,
+  },
+
+  linkText: {
+    textAlign: "center",
+    color: "#15803d",
+  },
+
+  linkStrong: {
+    fontWeight: "700",
+    textDecorationLine: "underline",
+  },
+
+  errorText: {
+    color: "red",
+    marginTop: 4,
+  },
+});

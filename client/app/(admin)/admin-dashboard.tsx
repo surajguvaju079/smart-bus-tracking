@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, Text } from "react-native";
+import { View, ScrollView, Text, StyleSheet } from "react-native";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import DashboardCard from "../../components/DashboardCard";
@@ -27,81 +27,120 @@ export default function AdminDashboard() {
     switch (currentPage) {
       case "Dashboard":
         return (
-          <View className="flex-1">
-            <View className="flex-row justify-between mb-6">
+          <View style={styles.flex1}>
+            <View style={styles.rowBetween}>
               <DashboardCard title="Buses" count={buses.length} />
               <DashboardCard title="Drivers" count={drivers.length} />
             </View>
+
             <BusTable buses={buses} />
             <MapCard buses={buses} />
           </View>
         );
+
       case "Buses":
         return <BusTable buses={buses} />;
 
       case "Drivers":
         return (
           <View>
-            <Text className="text-green-700 font-bold text-xl mb-2">
-              Driver List
-            </Text>
-            {/* Add driver search & list */}
+            <Text style={styles.title}>Driver List</Text>
+
             {drivers.map((driver) => (
-              <View
-                key={driver.id}
-                className="flex-row justify-between p-3 bg-green-50 mb-2 rounded-xl"
-              >
-                <Text className="text-green-800">{driver.name}</Text>
-                <Text className="text-green-600">{driver.busNo}</Text>
+              <View key={driver.id} style={styles.driverCard}>
+                <Text style={styles.driverName}>{driver.name}</Text>
+                <Text style={styles.driverBus}>{driver.busNo}</Text>
               </View>
             ))}
           </View>
         );
+
       case "Routes":
-        return (
-          <Text className="text-green-700 font-bold text-xl">
-            Routes Dashboard
-          </Text>
-        );
+        return <Text style={styles.title}>Routes Dashboard</Text>;
+
       case "Payments":
-        return (
-          <Text className="text-green-700 font-bold text-xl">
-            Payment Dashboard
-          </Text>
-        );
+        return <Text style={styles.title}>Payment Dashboard</Text>;
+
       case "Fares":
-        return (
-          <Text className="text-green-700 font-bold text-xl">
-            Fare Dashboard
-          </Text>
-        );
+        return <Text style={styles.title}>Fare Dashboard</Text>;
+
       case "Reports":
-        return (
-          <Text className="text-green-700 font-bold text-xl">
-            Reports Dashboard
-          </Text>
-        );
+        return <Text style={styles.title}>Reports Dashboard</Text>;
+
       case "Settings":
-        return (
-          <Text className="text-green-700 font-bold text-xl">
-            Settings Dashboard
-          </Text>
-        );
+        return <Text style={styles.title}>Settings Dashboard</Text>;
 
       case "Users":
         return <UserTable />;
+
       default:
         return null;
     }
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <View style={styles.container}>
       <Header />
-      <View className="flex-row flex-1">
+
+      <View style={styles.mainRow}>
         <Sidebar onSelect={setCurrentPage} />
-        <ScrollView className="flex-1 px-5 py-4">{renderContent()}</ScrollView>
+
+        <ScrollView style={styles.scroll}>
+          {renderContent()}
+        </ScrollView>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+
+  mainRow: {
+    flex: 1,
+    flexDirection: "row",
+  },
+
+  scroll: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+
+  flex1: {
+    flex: 1,
+  },
+
+  rowBetween: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 24,
+  },
+
+  title: {
+    color: "#15803d",
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+
+  driverCard: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 12,
+    backgroundColor: "#f0fdf4",
+    marginBottom: 8,
+    borderRadius: 12,
+  },
+
+  driverName: {
+    color: "#166534",
+  },
+
+  driverBus: {
+    color: "#16a34a",
+  },
+});

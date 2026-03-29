@@ -1,4 +1,5 @@
-import { ScrollView, View } from "react-native";
+import React from "react";
+import { ScrollView, View, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import AppHeader from "@/components/AppHeader";
@@ -7,13 +8,11 @@ import FeatureCard from "@/components/Featurecard";
 export default function Home() {
   const router = useRouter();
 
-  //router.push("/live-bus");
-
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView style={styles.container}>
       <AppHeader />
 
-      <View className="px-5 mt-6 flex-row flex-wrap justify-between">
+      <View style={styles.grid}>
         {/* Live Bus Tracking */}
         <FeatureCard
           title="Live Bus Tracking"
@@ -49,12 +48,13 @@ export default function Home() {
           onPress={() => router.push("/live-bus")}
         />
 
+        {/* Driver Tracking */}
         <FeatureCard
           title="Driver Tracking Location"
           icon={<MaterialIcons name="my-location" size={28} color="#166534" />}
           onPress={() =>
             router.push({
-              pathname: "/(driver)/[id]",
+              pathname: "/(routes)/[id]",
               params: { id: 1 },
             })
           }
@@ -63,3 +63,22 @@ export default function Home() {
     </ScrollView>
   );
 }
+
+/* =======================
+   STYLE SHEET
+======================= */
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+  },
+
+  grid: {
+    paddingHorizontal: 20,
+    marginTop: 24,
+
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+});

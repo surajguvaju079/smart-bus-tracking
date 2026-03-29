@@ -1,6 +1,10 @@
 import * as SplashScreen from "expo-splash-screen";
-import { ActivityIndicator } from "react-native";
 import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  View,
+  StyleSheet,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -54,8 +58,10 @@ const IndexPage = () => {
 
   if (!isHydrated || loading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#166534" />
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loader}>
+          <ActivityIndicator size="large" color="#166534" />
+        </View>
       </SafeAreaView>
     );
   }
@@ -64,3 +70,16 @@ const IndexPage = () => {
 };
 
 export default IndexPage;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+
+  loader: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
