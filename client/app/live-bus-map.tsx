@@ -13,8 +13,8 @@ const socket = io(SOCKET_URL);
 export default function LiveBusMap() {
   const { tripId } = useLocalSearchParams() as any;
 
-  const isAnimating = useRef(false);
   const mapRef = useRef<MapView | null>(null);
+  const isAnimating = useRef(false);
 
   const [locations, setLocations] = useState<any[]>([]);
   const [routeStops, setRouteStops] = useState<any[]>([]);
@@ -23,6 +23,7 @@ export default function LiveBusMap() {
 
   const [nextStop, setNextStop] = useState<any>(null);
   const [eta, setEta] = useState<number | null>(null);
+  const [etaList, setEtaList] = useState<any[]>([]);
 
   // Animated coordinate
   const animatedCoordinate = useRef(
@@ -35,18 +36,23 @@ export default function LiveBusMap() {
   ).current;
 
   // =========================
-  // INTERPOLATION
+  // Helpers
   // =========================
+  const formatEta = (seconds: number) => {
+    if (!seconds) return "--";
+    const min = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+    return `${min}m ${sec}s`;
+  };
+
   const interpolate = (start: any, end: any, steps = 20) => {
     const points = [];
     for (let i = 1; i <= steps; i++) {
       points.push({
         latitude:
-          Number(start.latitude) +
-          (Number(end.latitude) - Number(start.latitude)) * (i / steps),
+          start.latitude + (end.latitude - start.latitude) * (i / steps),
         longitude:
-          Number(start.longitude) +
-          (Number(end.longitude) - Number(start.longitude)) * (i / steps),
+          start.longitude + (end.longitude - start.longitude) * (i / steps),
       });
     }
     return points;
@@ -62,8 +68,8 @@ export default function LiveBusMap() {
       await new Promise((resolve) => {
         animatedCoordinate
           .timing({
-            latitude: Number(p.latitude),
-            longitude: Number(p.longitude),
+            latitude: p.latitude,
+            longitude: p.longitude,
             duration: 100,
             useNativeDriver: false,
           })
@@ -75,21 +81,27 @@ export default function LiveBusMap() {
   };
 
   // =========================
-  // FETCH ROUTE
+  // Fetch route + stops
   // =========================
   useEffect(() => {
     const fetchRoute = async () => {
       try {
         const res = await Route.show(Number(tripId));
         const stops = res?.data?.responseObject?.stops ?? [];
-        console.log("stops are", stops);
-        setRouteStops(stops);
 
-        if (stops.length > 0 && mapRef.current) {
+        const parsedStops = stops.map((s: any) => ({
+          ...s,
+          latitude: Number(s.latitude),
+          longitude: Number(s.longitude),
+        }));
+
+        setRouteStops(parsedStops);
+
+        if (parsedStops.length > 0 && mapRef.current) {
           mapRef.current.fitToCoordinates(
-            stops.map((s: any) => ({
-              latitude: Number(s.latitude),
-              longitude: Number(s.longitude),
+            parsedStops.map((s: any) => ({
+              latitude: s.latitude,
+              longitude: s.longitude,
             })),
             {
               edgePadding: { top: 100, right: 50, bottom: 100, left: 50 },
@@ -106,47 +118,63 @@ export default function LiveBusMap() {
   }, [tripId]);
 
   // =========================
-  // SOCKET
+  // Socket tracking
   // =========================
   useEffect(() => {
     if (!tripId) return;
 
     const handleLocation = (data: any) => {
+      const parsed = {
+        ...data,
+        latitude: Number(data.latitude),
+        longitude: Number(data.longitude),
+      };
+
       setLocations((prev) => {
         if (prev.length > 0) {
           const last = prev[prev.length - 1];
-          animateSmoothly(last, data);
+
+          animateSmoothly(last, parsed);
 
           const angle =
-            data.heading ??
+            parsed.heading ??
             (Math.atan2(
-              Number(data.longitude) - Number(last.longitude),
-              Number(data.latitude) - Number(last.latitude),
+              parsed.longitude - last.longitude,
+              parsed.latitude - last.latitude,
             ) *
               180) /
               Math.PI;
 
           setRotation(angle);
         } else {
-          animatedCoordinate.setValue({
-            latitude: Number(data.latitude),
-            longitude: Number(data.longitude),
-          });
+          animatedCoordinate.setValue(parsed);
         }
 
-        return [...prev.slice(-50), data];
+        return [...prev.slice(-50), parsed];
       });
 
-      // 🔥 NEW: backend-driven state
-      setSpeed(data.speed ?? 0);
-      setNextStop(data.nextStop ?? null);
-      setEta(data.eta ?? null);
+      setSpeed(Number(parsed.speed ?? 0));
+
+      // ✅ Backend-driven next stop
+      if (data.nextStop) {
+        setNextStop({
+          ...data.nextStop,
+          latitude: Number(data.nextStop.latitude),
+          longitude: Number(data.nextStop.longitude),
+        });
+      }
+
+      // ✅ ETA
+      setEta(data.etaToNext ?? null);
+
+      // ✅ Multi-stop ETA
+      setEtaList(data.etaList ?? []);
 
       mapRef.current?.animateCamera(
         {
           center: {
-            latitude: Number(data.latitude),
-            longitude: Number(data.longitude),
+            latitude: parsed.latitude,
+            longitude: parsed.longitude,
           },
           pitch: 45,
           heading: rotation,
@@ -169,35 +197,7 @@ export default function LiveBusMap() {
   }, [tripId]);
 
   // =========================
-  // ETA COUNTDOWN
-  // =========================
-  const [etaDisplay, setEtaDisplay] = useState<string>("--");
-
-  useEffect(() => {
-    if (!eta) return;
-
-    let seconds = eta;
-
-    const interval = setInterval(() => {
-      seconds -= 1;
-
-      if (seconds <= 0) {
-        clearInterval(interval);
-        setEtaDisplay("Arriving...");
-        return;
-      }
-
-      const min = Math.floor(seconds / 60);
-      const sec = seconds % 60;
-
-      setEtaDisplay(`${min}m ${sec}s`);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [eta]);
-
-  // =========================
-  // LOADING
+  // Loading
   // =========================
   if (locations.length === 0) {
     return (
@@ -220,8 +220,8 @@ export default function LiveBusMap() {
         ref={mapRef}
         style={{ flex: 1 }}
         initialRegion={{
-          latitude: Number(latest.latitude),
-          longitude: Number(latest.longitude),
+          latitude: latest.latitude,
+          longitude: latest.longitude,
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         }}
@@ -229,8 +229,8 @@ export default function LiveBusMap() {
         {/* Planned Route */}
         <Polyline
           coordinates={routeStops.map((s) => ({
-            latitude: Number(s.latitude),
-            longitude: Number(s.longitude),
+            latitude: s.latitude,
+            longitude: s.longitude,
           }))}
           strokeWidth={3}
           strokeColor="#9CA3AF"
@@ -245,7 +245,13 @@ export default function LiveBusMap() {
 
         {/* Stops */}
         {routeStops.map((stop, index) => (
-          <Marker key={stop.id} coordinate={stop}>
+          <Marker
+            key={stop.id}
+            coordinate={{
+              latitude: stop.latitude,
+              longitude: stop.longitude,
+            }}
+          >
             <MaterialIcons
               name={index === routeStops.length - 1 ? "flag" : "trip-origin"}
               size={20}
@@ -256,7 +262,12 @@ export default function LiveBusMap() {
 
         {/* Next Stop Highlight */}
         {nextStop && (
-          <Marker coordinate={nextStop}>
+          <Marker
+            coordinate={{
+              latitude: nextStop.latitude,
+              longitude: nextStop.longitude,
+            }}
+          >
             <MaterialIcons name="place" size={30} color="orange" />
           </Marker>
         )}
@@ -281,7 +292,37 @@ export default function LiveBusMap() {
       <Text style={boxStyle(140)}>Next Stop: {nextStop?.name ?? "--"}</Text>
 
       {/* ETA */}
-      <Text style={boxStyle(180)}>ETA: {etaDisplay}</Text>
+      <Text style={boxStyle(180)}>ETA: {formatEta(eta ?? 0)}</Text>
+
+      {/* Multi-stop ETA */}
+      <View
+        style={{
+          position: "absolute",
+          top: 220,
+          left: 20,
+          right: 20,
+          backgroundColor: "white",
+          padding: 10,
+          borderRadius: 10,
+          maxHeight: 200,
+        }}
+      >
+        <Text style={{ fontWeight: "bold", marginBottom: 6 }}>
+          Upcoming Stops
+        </Text>
+
+        {etaList.slice(0, 5).map((stop, index) => (
+          <Text
+            key={stop.stopId}
+            style={{
+              fontWeight: index === 0 ? "bold" : "normal",
+              color: index === 0 ? "#15803d" : "#000",
+            }}
+          >
+            {stop.stopName} → {formatEta(stop.eta)}
+          </Text>
+        ))}
+      </View>
     </View>
   );
 }
