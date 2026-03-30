@@ -1,3 +1,4 @@
+import React from "react";
 import {
   View,
   Text,
@@ -5,6 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -23,19 +25,9 @@ type LoginForm = {
 };
 
 export default function UserLogin() {
-  // ========================
-  // Navigation
-  // ========================
   const router = useRouter();
-
-  // ========================
-  // Zustand Store
-  // ========================
   const { setUser } = useUserStore();
 
-  // ========================
-  // Local State
-  // ========================
   const {
     control,
     handleSubmit,
@@ -45,127 +37,123 @@ export default function UserLogin() {
     defaultValues: { email: "", password: "" },
   });
 
-  // ========================
-  // Functions and Utilities
-  // ========================
   const onSubmit = async (data: LoginForm) => {
     try {
       const res = await Auth.login({
         email: data.email.trim().toLowerCase(),
         password: data.password.trim(),
       });
-      console.log("Login response status:", res.status);
-      console.log("Login response:", res.data.responseObject);
 
       const { access_token, refresh_token } = res.data.responseObject;
+
       if (res?.data?.responseObject?.user) {
         setUser(res.data.responseObject.user);
       }
+
       await AsyncStorage.setItem("accessToken", access_token);
       await AsyncStorage.setItem("refreshToken", refresh_token);
 
-      if (res?.data?.responseObject?.user?.role === "ADMIN") {
-        console.log("admin login is here");
+      const role = res?.data?.responseObject?.user?.role;
+
+      if (role === "ADMIN") {
         router.replace("/admin-dashboard");
         return;
       }
 
-      if (res?.data?.responseObject?.user?.role === "USER") {
-        console.log("user login is here");
+      if (role === "USER") {
         router.replace("/home");
         return;
       }
-      if (res?.data?.responseObject?.user?.role === "DRIVER") {
-        console.log("driver login is here");
+
+      if (role === "DRIVER") {
         router.replace("/driver-dashboard");
         return;
       }
 
       Alert.alert("Login Successful", "Welcome back!");
-      return;
     } catch (error: any) {
-      console.log("Login error:", error?.response || error.message || error);
       if (error.response?.status === 401) {
         Alert.alert("Login Failed", "Invalid credentials");
       } else {
         Alert.alert(
           "Error",
-          error?.response?.data?.error?.message || "Something went wrong",
+          error?.response?.data?.error?.message || "Something went wrong"
         );
       }
     }
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <View style={styles.container}>
       <AppHeader />
-      <View className="px-6 mt-12">
-        <Text className="text-2xl font-bold text-green-700 text-center">
-          User/Driver Login
-        </Text>
 
-        {/* Email */}
+      <View style={styles.content}>
+        <Text style={styles.title}>User/Driver Login</Text>
+
+        {/* EMAIL */}
         <Controller
           control={control}
           name="email"
           render={({ field: { value, onChange } }) => (
-            <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-8">
+            <View style={styles.inputBox}>
               <MaterialIcons name="email" size={22} color="#15803d" />
               <TextInput
                 placeholder="Email"
                 keyboardType="email-address"
                 autoCapitalize="none"
-                className="ml-3 flex-1"
+                style={styles.input}
                 value={value}
                 onChangeText={onChange}
               />
             </View>
           )}
         />
+
         {errors.email && (
-          <Text className="text-red-500">{errors.email.message}</Text>
+          <Text style={styles.errorText}>{errors.email.message}</Text>
         )}
 
-        {/* Password */}
+        {/* PASSWORD */}
         <Controller
           control={control}
           name="password"
           render={({ field: { value, onChange } }) => (
-            <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-4">
+            <View style={styles.inputBox}>
               <MaterialIcons name="lock" size={22} color="#15803d" />
               <TextInput
                 placeholder="Password"
                 secureTextEntry
-                className="ml-3 flex-1"
+                style={styles.input}
                 value={value}
                 onChangeText={onChange}
               />
             </View>
           )}
         />
+
         {errors.password && (
-          <Text className="text-red-500">{errors.password.message}</Text>
+          <Text style={styles.errorText}>{errors.password.message}</Text>
         )}
 
+        {/* BUTTON */}
         <TouchableOpacity
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
-          className="bg-green-700 py-3 rounded-lg mt-6"
+          style={styles.button}
         >
           {isSubmitting ? (
-            <ActivityIndicator color="#ffffff" />
+            <ActivityIndicator color="#fff" />
           ) : (
-            <Text className="text-white text-center font-semibold text-lg">
-              Login
-            </Text>
+            <Text style={styles.buttonText}>Login</Text>
           )}
         </TouchableOpacity>
 
+        {/* REGISTER */}
         <TouchableOpacity
           onPress={() => router.push("/user-register")}
-          className="mt-5"
+          style={styles.switchBox}
         >
-          <Text className="text-center text-green-700">
+          <Text style={styles.switchText}>
             Don’t have an account? Register
           </Text>
         </TouchableOpacity>
@@ -173,3 +161,67 @@ export default function UserLogin() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+
+  content: {
+    paddingHorizontal: 24,
+    marginTop: 48,
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#15803d",
+    textAlign: "center",
+  },
+
+  inputBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#86efac",
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginTop: 16,
+  },
+
+  input: {
+    marginLeft: 12,
+    flex: 1,
+    fontSize: 16,
+  },
+
+  button: {
+    backgroundColor: "#15803d",
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 24,
+  },
+
+  buttonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+
+  switchBox: {
+    marginTop: 20,
+  },
+
+  switchText: {
+    textAlign: "center",
+    color: "#15803d",
+  },
+
+  errorText: {
+    color: "red",
+    marginTop: 4,
+  },
+});

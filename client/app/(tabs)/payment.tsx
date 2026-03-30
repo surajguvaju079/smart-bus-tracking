@@ -6,11 +6,11 @@ import {
   ScrollView,
   Linking,
   Alert,
+  StyleSheet,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import AppHeader from "@/components/AppHeader";
 
-// Example bus stops with approximate distance in km
 const BUS_STOPS = [
   { name: "Ratnapark", km: 0 },
   { name: "Tripureshwor", km: 2 },
@@ -28,30 +28,26 @@ export default function PaymentPage() {
   const [distance, setDistance] = useState(Math.abs(to.km - from.km));
   const [fare, setFare] = useState(distance * 5);
 
-  // Update fare when selecting stops
-  const updateFare = (
-    fromStop: (typeof BUS_STOPS)[0],
-    toStop: (typeof BUS_STOPS)[0],
-  ) => {
+  const updateFare = (fromStop: any, toStop: any) => {
     const dist = Math.abs(toStop.km - fromStop.km);
     setDistance(dist);
     setFare(dist * 5);
   };
 
-  const handleFromSelect = (stop: (typeof BUS_STOPS)[0]) => {
+  const handleFromSelect = (stop: any) => {
     setFrom(stop);
     updateFare(stop, to);
   };
 
-  const handleToSelect = (stop: (typeof BUS_STOPS)[0]) => {
+  const handleToSelect = (stop: any) => {
     setTo(stop);
     updateFare(from, stop);
   };
 
-  // eSewa redirect listener
   useEffect(() => {
     const subscription = Linking.addEventListener("url", (event) => {
       const url = event.url;
+
       if (url.includes("payment-success")) {
         Alert.alert("Payment Success", "Your payment was successful!");
       } else if (url.includes("payment-failure")) {
@@ -59,17 +55,15 @@ export default function PaymentPage() {
       }
     });
 
-    return () => {
-      subscription.remove();
-    };
+    return () => subscription.remove();
   }, []);
 
   const handlePay = async () => {
     const pid = `busfare${Date.now()}`;
     const pdc = "busfare";
-    const scd = "EPAYTEST"; // sandbox merchant code
-    const su = "myapp://payment-success"; // deep link scheme for success
-    const fu = "myapp://payment-failure"; // deep link scheme for failure
+    const scd = "EPAYTEST";
+    const su = "myapp://payment-success";
+    const fu = "myapp://payment-failure";
     const amount = fare.toFixed(2);
 
     const esewaUrl = `https://esewa.com.np/epay/main?amt=${amount}&pdc=${pdc}&scd=${scd}&pid=${pid}&su=${su}&fu=${fu}`;
@@ -83,75 +77,175 @@ export default function PaymentPage() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-green-50">
+    <ScrollView style={styles.container}>
       <AppHeader />
-      <View className="px-6 mt-6">
-        <Text className="text-2xl font-bold text-green-700 text-center">
-          Fare and Payment
-        </Text>
+
+      <View style={styles.wrapper}>
+        <Text style={styles.title}>Fare and Payment</Text>
 
         {/* FROM */}
-        <Text className="text-gray-700 mt-6 mb-2">From</Text>
-        <View className="bg-white rounded-xl px-4 py-3 flex-row justify-between items-center">
+        <Text style={styles.label}>From</Text>
+
+        <View style={styles.selectedBox}>
           <Text>{from.name}</Text>
           <MaterialIcons name="keyboard-arrow-down" size={24} color="#15803d" />
         </View>
-        <View className="mt-2 flex-row flex-wrap">
+
+        <View style={styles.listWrap}>
           {BUS_STOPS.map((stop) => (
             <TouchableOpacity
               key={stop.name}
               onPress={() => handleFromSelect(stop)}
-              className={`px-3 py-2 rounded-lg m-1 ${from.name === stop.name ? "bg-green-700" : "bg-green-200"}`}
+              style={[
+                styles.stopBtn,
+                from.name === stop.name
+                  ? styles.activeBtn
+                  : styles.inactiveBtn,
+              ]}
             >
-              <Text className="text-white font-semibold">{stop.name}</Text>
+              <Text style={styles.stopText}>{stop.name}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
         {/* TO */}
-        <Text className="text-gray-700 mt-4 mb-2">To</Text>
-        <View className="bg-white rounded-xl px-4 py-3 flex-row justify-between items-center">
+        <Text style={styles.label}>To</Text>
+
+        <View style={styles.selectedBox}>
           <Text>{to.name}</Text>
           <MaterialIcons name="keyboard-arrow-down" size={24} color="#15803d" />
         </View>
-        <View className="mt-2 flex-row flex-wrap">
+
+        <View style={styles.listWrap}>
           {BUS_STOPS.map((stop) => (
             <TouchableOpacity
               key={stop.name}
               onPress={() => handleToSelect(stop)}
-              className={`px-3 py-2 rounded-lg m-1 ${to.name === stop.name ? "bg-green-700" : "bg-green-200"}`}
+              style={[
+                styles.stopBtn,
+                to.name === stop.name ? styles.activeBtn : styles.inactiveBtn,
+              ]}
             >
-              <Text className="text-white font-semibold">{stop.name}</Text>
+              <Text style={styles.stopText}>{stop.name}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* Distance & Fare */}
-        <Text className="text-gray-700 mt-6 mb-2">
-          Distance Travelled: <Text className="font-bold">{distance} km</Text>
+        {/* Distance */}
+        <Text style={styles.distanceText}>
+          Distance Travelled: <Text style={styles.bold}>{distance} km</Text>
         </Text>
-        <View className="bg-green-600 rounded-xl py-4 mt-2">
-          <Text className="text-white text-center text-lg font-bold">
-            Total Fare: Rs. {fare}.00
-          </Text>
+
+        {/* Fare */}
+        <View style={styles.fareBox}>
+          <Text style={styles.fareText}>Total Fare: Rs. {fare}.00</Text>
         </View>
 
-        {/* eSewa Option */}
-        <Text className="text-gray-700 mt-6 mb-2">Payment Option</Text>
-        <View className="bg-white rounded-xl px-4 py-4 flex-row items-center w-36">
-          <Text className="text-green-700 font-bold">eSewa</Text>
+        {/* Payment */}
+        <Text style={styles.label}>Payment Option</Text>
+
+        <View style={styles.paymentBox}>
+          <Text style={styles.esewa}>eSewa</Text>
         </View>
 
-        {/* Pay Now */}
-        <TouchableOpacity
-          onPress={handlePay}
-          className="bg-green-700 py-4 rounded-xl mt-6"
-        >
-          <Text className="text-white text-center font-bold text-lg">
-            Pay Now
-          </Text>
+        {/* Pay Button */}
+        <TouchableOpacity style={styles.payBtn} onPress={handlePay}>
+          <Text style={styles.payText}>Pay Now</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f0fdf4",
+  },
+  wrapper: {
+    paddingHorizontal: 24,
+    marginTop: 24,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#15803d",
+    textAlign: "center",
+  },
+  label: {
+    color: "#374151",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  selectedBox: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  listWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 8,
+  },
+  stopBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    margin: 4,
+  },
+  activeBtn: {
+    backgroundColor: "#15803d",
+  },
+  inactiveBtn: {
+    backgroundColor: "#bbf7d0",
+  },
+  stopText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+  distanceText: {
+    color: "#374151",
+    marginTop: 24,
+  },
+  bold: {
+    fontWeight: "bold",
+  },
+  fareBox: {
+    backgroundColor: "#16a34a",
+    borderRadius: 12,
+    paddingVertical: 16,
+    marginTop: 8,
+  },
+  fareText: {
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  paymentBox: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    width: 120,
+  },
+  esewa: {
+    color: "#15803d",
+    fontWeight: "bold",
+  },
+  payBtn: {
+    backgroundColor: "#15803d",
+    paddingVertical: 16,
+    borderRadius: 12,
+    marginTop: 24,
+  },
+  payText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+});

@@ -1,4 +1,11 @@
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import { useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import AppHeader from "../components/AppHeader";
@@ -8,67 +15,131 @@ export default function ETAPage() {
   const [to, setTo] = useState("");
   const [eta, setETA] = useState<number | null>(null);
 
-  // Dummy AI prediction function (replace with backend API)
   const predictETA = () => {
-    // Here you would call your ML model on backend
-    // For demo, we just generate random ETA
-    const randomETA = Math.floor(Math.random() * 20 + 10); // 10-30 minutes
+    const randomETA = Math.floor(Math.random() * 20 + 10);
     setETA(randomETA);
   };
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView style={styles.container}>
       <AppHeader />
 
-      <View className="px-6 mt-6">
-        <Text className="text-2xl font-bold text-green-700 text-center">
-          ETA Prediction
-        </Text>
+      <View style={styles.wrapper}>
+        <Text style={styles.title}>ETA Prediction</Text>
 
         {/* From */}
-        <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-6">
+        <View style={styles.inputBox}>
           <MaterialIcons name="my-location" size={22} color="#15803d" />
           <TextInput
             placeholder="From (Current Location)"
             value={from}
             onChangeText={setFrom}
-            className="ml-3 flex-1"
+            style={styles.input}
+            placeholderTextColor="#9ca3af"
           />
         </View>
 
         {/* To */}
-        <View className="flex-row items-center border border-green-300 rounded-lg px-4 py-3 mt-4">
+        <View style={styles.inputBox}>
           <MaterialIcons name="location-on" size={22} color="#15803d" />
           <TextInput
             placeholder="To (Destination)"
             value={to}
             onChangeText={setTo}
-            className="ml-3 flex-1"
+            style={styles.input}
+            placeholderTextColor="#9ca3af"
           />
         </View>
 
-        {/* Predict Button */}
-        <TouchableOpacity
-          onPress={predictETA}
-          className="bg-green-700 py-3 rounded-lg mt-6"
-        >
-          <Text className="text-white text-center font-semibold text-lg">
-            Predict ETA
-          </Text>
+        {/* Button */}
+        <TouchableOpacity style={styles.button} onPress={predictETA}>
+          <Text style={styles.buttonText}>Predict ETA</Text>
         </TouchableOpacity>
 
-        {/* ETA Result */}
+        {/* Result */}
         {eta !== null && (
-          <View className="mt-6 bg-green-100 rounded-lg p-4">
-            <Text className="text-green-800 text-lg font-semibold text-center">
+          <View style={styles.resultBox}>
+            <Text style={styles.resultTitle}>
               Estimated Time of Arrival
             </Text>
-            <Text className="text-green-700 text-center mt-2 text-xl">
-              {eta} minutes
-            </Text>
+
+            <Text style={styles.resultValue}>{eta} minutes</Text>
           </View>
         )}
       </View>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+
+  wrapper: {
+    paddingHorizontal: 24,
+    marginTop: 24,
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#15803d",
+    textAlign: "center",
+  },
+
+  inputBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#86efac",
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginTop: 16,
+  },
+
+  input: {
+    marginLeft: 12,
+    flex: 1,
+    fontSize: 14,
+    color: "#111827",
+  },
+
+  button: {
+    backgroundColor: "#15803d",
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 24,
+  },
+
+  buttonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+
+  resultBox: {
+    marginTop: 24,
+    backgroundColor: "#dcfce7",
+    borderRadius: 8,
+    padding: 16,
+  },
+
+  resultTitle: {
+    color: "#166534",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+
+  resultValue: {
+    color: "#15803d",
+    textAlign: "center",
+    marginTop: 8,
+    fontSize: 20,
+    fontWeight: "700",
+  },
+});

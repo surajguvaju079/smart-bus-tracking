@@ -1,4 +1,10 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import React from "react";
 import { ScrollView } from "react-native-gesture-handler";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -6,6 +12,7 @@ import AppHeader from "@/components/AppHeader";
 import { useUserStore } from "@/store/userStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+
 const Profile = () => {
   const router = useRouter();
   const user = useUserStore((state) => state.user);
@@ -21,93 +28,84 @@ const Profile = () => {
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <ScrollView style={styles.container}>
       <AppHeader />
 
       {/* Profile Header */}
-      <View className="items-center mt-6">
+      <View style={styles.profileHeader}>
         <Image
           source={require("../../assets/images/user.jpg")}
-          className="w-28 h-28 rounded-full border-4 border-green-600"
+          style={styles.avatar}
         />
 
-        <Text className="text-2xl font-bold text-gray-800 mt-4">
-          {user?.name || "User"}
-        </Text>
+        <Text style={styles.name}>{user?.name || "User"}</Text>
 
-        <Text className="text-gray-500 mt-1">{user?.email}</Text>
+        <Text style={styles.email}>{user?.email}</Text>
 
-        <TouchableOpacity className="bg-green-600 px-6 py-2 rounded-full mt-4 shadow">
-          <Text className="text-white font-semibold">Edit Profile</Text>
+        <TouchableOpacity style={styles.editBtn}>
+          <Text style={styles.editText}>Edit Profile</Text>
         </TouchableOpacity>
       </View>
 
       {/* Info Card */}
-      <View className="bg-white rounded-2xl shadow-sm mx-5 mt-8 p-5">
-        <Text className="text-lg font-semibold text-gray-800 mb-4">
-          Personal Information
-        </Text>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Personal Information</Text>
 
         {/* Name */}
-        <View className="flex-row items-center mb-4">
+        <View style={styles.row}>
           <MaterialIcons name="person" size={22} color="#16a34a" />
-          <View className="ml-4">
-            <Text className="text-gray-500 text-sm">Name</Text>
-            <Text className="text-gray-800 font-medium">{user?.name}</Text>
+          <View style={styles.textBox}>
+            <Text style={styles.label}>Name</Text>
+            <Text style={styles.value}>{user?.name}</Text>
           </View>
         </View>
 
         {/* Email */}
-        <View className="flex-row items-center mb-4">
+        <View style={styles.row}>
           <MaterialIcons name="email" size={22} color="#16a34a" />
-          <View className="ml-4">
-            <Text className="text-gray-500 text-sm">Email</Text>
-            <Text className="text-gray-800 font-medium">{user?.email}</Text>
+          <View style={styles.textBox}>
+            <Text style={styles.label}>Email</Text>
+            <Text style={styles.value}>{user?.email}</Text>
           </View>
         </View>
 
         {/* Phone */}
-        <View className="flex-row items-center mb-4">
+        <View style={styles.row}>
           <MaterialIcons name="phone" size={22} color="#16a34a" />
-          <View className="ml-4">
-            <Text className="text-gray-500 text-sm">Phone</Text>
-            <Text className="text-gray-800 font-medium">
+          <View style={styles.textBox}>
+            <Text style={styles.label}>Phone</Text>
+            <Text style={styles.value}>
               {user?.phoneNumber || "Not added"}
             </Text>
           </View>
         </View>
 
         {/* Role */}
-        <View className="flex-row items-center">
+        <View style={styles.row}>
           <MaterialIcons name="verified-user" size={22} color="#16a34a" />
-          <View className="ml-4">
-            <Text className="text-gray-500 text-sm">Role</Text>
-            <Text className="text-gray-800 font-medium">{user?.role}</Text>
+          <View style={styles.textBox}>
+            <Text style={styles.label}>Role</Text>
+            <Text style={styles.value}>{user?.role}</Text>
           </View>
         </View>
       </View>
 
       {/* Account Section */}
-      <View className="bg-white rounded-2xl shadow-sm mx-5 mt-6 p-5 mb-10">
-        <Text className="text-lg font-semibold text-gray-800 mb-4">
-          Account
-        </Text>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Account</Text>
 
-        <TouchableOpacity className="flex-row justify-between items-center py-3 border-b border-gray-100">
-          <Text className="text-gray-700">Change Password</Text>
+        <TouchableOpacity style={styles.option}>
+          <Text style={styles.optionText}>Change Password</Text>
           <MaterialIcons name="arrow-forward-ios" size={16} color="gray" />
         </TouchableOpacity>
 
-        <TouchableOpacity className="flex-row justify-between items-center py-3 border-b border-gray-100">
-          <Text className="text-gray-700">Payment Methods</Text>
+        <TouchableOpacity style={styles.option}>
+          <Text style={styles.optionText}>Payment Methods</Text>
           <MaterialIcons name="arrow-forward-ios" size={16} color="gray" />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={handleLogout}
-          className="flex-row justify-between items-center py-3"
-        >
-          <Text className="text-red-500 font-medium">Logout</Text>
+        <TouchableOpacity style={styles.logout} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Logout</Text>
           <MaterialIcons name="logout" size={20} color="red" />
         </TouchableOpacity>
       </View>
@@ -116,3 +114,109 @@ const Profile = () => {
 };
 
 export default Profile;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f9fafb",
+  },
+
+  profileHeader: {
+    alignItems: "center",
+    marginTop: 24,
+  },
+
+  avatar: {
+    width: 112,
+    height: 112,
+    borderRadius: 56,
+    borderWidth: 4,
+    borderColor: "#16a34a",
+  },
+
+  name: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#1f2937",
+    marginTop: 16,
+  },
+
+  email: {
+    color: "#6b7280",
+    marginTop: 4,
+  },
+
+  editBtn: {
+    backgroundColor: "#16a34a",
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+    borderRadius: 999,
+    marginTop: 16,
+  },
+
+  editText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginHorizontal: 20,
+    marginTop: 24,
+    padding: 20,
+  },
+
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 16,
+    color: "#1f2937",
+  },
+
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+
+  textBox: {
+    marginLeft: 16,
+  },
+
+  label: {
+    fontSize: 12,
+    color: "#6b7280",
+  },
+
+  value: {
+    fontSize: 14,
+    color: "#1f2937",
+    fontWeight: "500",
+  },
+
+  option: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
+  },
+
+  optionText: {
+    color: "#374151",
+  },
+
+  logout: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+  },
+
+  logoutText: {
+    color: "red",
+    fontWeight: "600",
+  },
+});
