@@ -8,7 +8,6 @@ import { useEffect, useState, useRef } from "react";
 import { SOCKET_URL } from "@/constants/SocketUrl";
 import { Route } from "@/api/route";
 
-const API_URL = "YOUR_API_URL_HERE"; // 🔥 replace this
 const socket = io(SOCKET_URL);
 
 export default function LiveBusMap() {
@@ -22,6 +21,9 @@ export default function LiveBusMap() {
   const [rotation, setRotation] = useState(0);
   const [speed, setSpeed] = useState(0);
 
+  const [nextStop, setNextStop] = useState<any>(null);
+  const [eta, setEta] = useState<number | null>(null);
+
   // Animated coordinate
   const animatedCoordinate = useRef(
     new AnimatedRegion({
@@ -33,49 +35,20 @@ export default function LiveBusMap() {
   ).current;
 
   // =========================
-  // Distance (Haversine)
-  // =========================
-  const distance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    const R = 6371000;
-    const toRad = (v: number) => (v * Math.PI) / 180;
-
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  };
-
-  // =========================
-  // Rotation
-  // =========================
-  const getRotation = (start: any, end: any) => {
-    const latDiff = end.latitude - start.latitude;
-    const lngDiff = end.longitude - start.longitude;
-    return (Math.atan2(lngDiff, latDiff) * 180) / Math.PI;
-  };
-
-  // =========================
-  // Interpolation
+  // INTERPOLATION
   // =========================
   const interpolate = (start: any, end: any, steps = 20) => {
     const points = [];
-
     for (let i = 1; i <= steps; i++) {
-      const lat =
-        start.latitude + (end.latitude - start.latitude) * (i / steps);
-      const lng =
-        start.longitude + (end.longitude - start.longitude) * (i / steps);
-
-      points.push({ latitude: lat, longitude: lng });
+      points.push({
+        latitude:
+          Number(start.latitude) +
+          (Number(end.latitude) - Number(start.latitude)) * (i / steps),
+        longitude:
+          Number(start.longitude) +
+          (Number(end.longitude) - Number(start.longitude)) * (i / steps),
+      });
     }
-
     return points;
   };
 
@@ -85,12 +58,12 @@ export default function LiveBusMap() {
 
     const points = interpolate(start, end, 20);
 
-    for (let i = 0; i < points.length; i++) {
+    for (let p of points) {
       await new Promise((resolve) => {
         animatedCoordinate
           .timing({
-            latitude: points[i].latitude,
-            longitude: points[i].longitude,
+            latitude: Number(p.latitude),
+            longitude: Number(p.longitude),
             duration: 100,
             useNativeDriver: false,
           })
@@ -102,37 +75,30 @@ export default function LiveBusMap() {
   };
 
   // =========================
-  // Fetch Route + Stops
+  // FETCH ROUTE
   // =========================
   useEffect(() => {
     const fetchRoute = async () => {
       try {
         const res = await Route.show(Number(tripId));
-
         const stops = res?.data?.responseObject?.stops ?? [];
-
+        console.log("stops are", stops);
         setRouteStops(stops);
 
-        // Fit map to route
         if (stops.length > 0 && mapRef.current) {
           mapRef.current.fitToCoordinates(
             stops.map((s: any) => ({
-              latitude: s.latitude,
-              longitude: s.longitude,
+              latitude: Number(s.latitude),
+              longitude: Number(s.longitude),
             })),
             {
-              edgePadding: {
-                top: 100,
-                right: 50,
-                bottom: 100,
-                left: 50,
-              },
+              edgePadding: { top: 100, right: 50, bottom: 100, left: 50 },
               animated: true,
             },
           );
         }
       } catch (error) {
-        console.log("Error fetching route:", error);
+        console.log("Route fetch error:", error);
       }
     };
 
@@ -140,7 +106,7 @@ export default function LiveBusMap() {
   }, [tripId]);
 
   // =========================
-  // Socket Tracking
+  // SOCKET
   // =========================
   useEffect(() => {
     if (!tripId) return;
@@ -149,37 +115,38 @@ export default function LiveBusMap() {
       setLocations((prev) => {
         if (prev.length > 0) {
           const last = prev[prev.length - 1];
-
-          const d = distance(
-            last.latitude,
-            last.longitude,
-            data.latitude,
-            data.longitude,
-          );
-
-          if (d < 5) return prev;
-
           animateSmoothly(last, data);
 
-          const angle = data.heading ?? getRotation(last, data);
+          const angle =
+            data.heading ??
+            (Math.atan2(
+              Number(data.longitude) - Number(last.longitude),
+              Number(data.latitude) - Number(last.latitude),
+            ) *
+              180) /
+              Math.PI;
 
           setRotation(angle);
-          setSpeed(data.speed ?? 0);
         } else {
           animatedCoordinate.setValue({
-            latitude: data.latitude,
-            longitude: data.longitude,
+            latitude: Number(data.latitude),
+            longitude: Number(data.longitude),
           });
         }
 
         return [...prev.slice(-50), data];
       });
 
+      // 🔥 NEW: backend-driven state
+      setSpeed(data.speed ?? 0);
+      setNextStop(data.nextStop ?? null);
+      setEta(data.eta ?? null);
+
       mapRef.current?.animateCamera(
         {
           center: {
-            latitude: data.latitude,
-            longitude: data.longitude,
+            latitude: Number(data.latitude),
+            longitude: Number(data.longitude),
           },
           pitch: 45,
           heading: rotation,
@@ -202,37 +169,35 @@ export default function LiveBusMap() {
   }, [tripId]);
 
   // =========================
-  // Nearest Stop
+  // ETA COUNTDOWN
   // =========================
-  const latest = locations[locations.length - 1];
+  const [etaDisplay, setEtaDisplay] = useState<string>("--");
 
-  const getNearestStop = () => {
-    if (!latest || routeStops.length === 0) return null;
+  useEffect(() => {
+    if (!eta) return;
 
-    let minDist = Infinity;
-    let nearest = null;
+    let seconds = eta;
 
-    routeStops.forEach((stop) => {
-      const d = distance(
-        latest.latitude,
-        latest.longitude,
-        stop.latitude,
-        stop.longitude,
-      );
+    const interval = setInterval(() => {
+      seconds -= 1;
 
-      if (d < minDist) {
-        minDist = d;
-        nearest = stop;
+      if (seconds <= 0) {
+        clearInterval(interval);
+        setEtaDisplay("Arriving...");
+        return;
       }
-    });
 
-    return nearest;
-  };
+      const min = Math.floor(seconds / 60);
+      const sec = seconds % 60;
 
-  const nearestStop = getNearestStop();
+      setEtaDisplay(`${min}m ${sec}s`);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [eta]);
 
   // =========================
-  // Loading
+  // LOADING
   // =========================
   if (locations.length === 0) {
     return (
@@ -241,6 +206,8 @@ export default function LiveBusMap() {
       </View>
     );
   }
+
+  const latest = locations[locations.length - 1];
 
   // =========================
   // UI
@@ -253,44 +220,32 @@ export default function LiveBusMap() {
         ref={mapRef}
         style={{ flex: 1 }}
         initialRegion={{
-          latitude: latest.latitude,
-          longitude: latest.longitude,
+          latitude: Number(latest.latitude),
+          longitude: Number(latest.longitude),
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         }}
       >
-        {/* Planned Route (Grey) */}
-        {routeStops.length > 0 && (
-          <Polyline
-            coordinates={routeStops.map((stop) => ({
-              latitude: stop.latitude,
-              longitude: stop.longitude,
-            }))}
-            strokeWidth={3}
-            strokeColor="#9CA3AF"
-          />
-        )}
-
-        {/* Live Path (Green) */}
+        {/* Planned Route */}
         <Polyline
-          coordinates={locations.map((loc) => ({
-            latitude: loc.latitude,
-            longitude: loc.longitude,
+          coordinates={routeStops.map((s) => ({
+            latitude: Number(s.latitude),
+            longitude: Number(s.longitude),
           }))}
+          strokeWidth={3}
+          strokeColor="#9CA3AF"
+        />
+
+        {/* Live Path */}
+        <Polyline
+          coordinates={locations}
           strokeWidth={4}
           strokeColor="#15803d"
         />
 
         {/* Stops */}
         {routeStops.map((stop, index) => (
-          <Marker
-            key={stop.id}
-            coordinate={{
-              latitude: stop.latitude,
-              longitude: stop.longitude,
-            }}
-            title={stop.name}
-          >
+          <Marker key={stop.id} coordinate={stop}>
             <MaterialIcons
               name={index === routeStops.length - 1 ? "flag" : "trip-origin"}
               size={20}
@@ -299,19 +254,14 @@ export default function LiveBusMap() {
           </Marker>
         ))}
 
-        {/* Nearest Stop */}
-        {nearestStop && (
-          <Marker
-            coordinate={{
-              latitude: nearestStop.latitude,
-              longitude: nearestStop.longitude,
-            }}
-          >
+        {/* Next Stop Highlight */}
+        {nextStop && (
+          <Marker coordinate={nextStop}>
             <MaterialIcons name="place" size={30} color="orange" />
           </Marker>
         )}
 
-        {/* Animated Bus */}
+        {/* Animated Vehicle */}
         <Marker.Animated coordinate={animatedCoordinate}>
           <MaterialIcons
             name="navigation"
@@ -325,32 +275,23 @@ export default function LiveBusMap() {
       </MapView>
 
       {/* Speed */}
-      <Text
-        style={{
-          position: "absolute",
-          top: 100,
-          left: 20,
-          backgroundColor: "white",
-          padding: 8,
-          borderRadius: 8,
-        }}
-      >
-        Speed: {(speed * 3.6).toFixed(1)} km/h
-      </Text>
+      <Text style={boxStyle(100)}>Speed: {(speed * 3.6).toFixed(1)} km/h</Text>
 
       {/* Next Stop */}
-      <Text
-        style={{
-          position: "absolute",
-          top: 140,
-          left: 20,
-          backgroundColor: "white",
-          padding: 8,
-          borderRadius: 8,
-        }}
-      >
-        Next Stop: {nearestStop?.name ?? "—"}
-      </Text>
+      <Text style={boxStyle(140)}>Next Stop: {nextStop?.name ?? "--"}</Text>
+
+      {/* ETA */}
+      <Text style={boxStyle(180)}>ETA: {etaDisplay}</Text>
     </View>
   );
 }
+
+// UI helper
+const boxStyle = (top: number) => ({
+  position: "absolute" as const,
+  top,
+  left: 20,
+  backgroundColor: "white",
+  padding: 8,
+  borderRadius: 8,
+});
